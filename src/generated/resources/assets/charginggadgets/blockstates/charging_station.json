@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "lit=false": {
+      "model": "charginggadgets:block/charging_station_off"
+    },
+    "lit=true": {
+      "model": "charginggadgets:block/charging_station_on"
+    }
+  }
+}

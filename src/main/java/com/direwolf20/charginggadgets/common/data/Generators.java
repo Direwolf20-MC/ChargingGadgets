@@ -12,7 +12,7 @@ import net.minecraftforge.fml.event.lifecycle.GatherDataEvent;
 
 /**
  * @implNote I've chosen to keep the small limited generators to this class but to
- *           expand the more complex or larger generators to a different file.
+ * expand the more complex or larger generators to a different file.
  */
 @Mod.EventBusSubscriber(modid = ChargingGadgets.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public final class Generators {
@@ -20,11 +20,11 @@ public final class Generators {
     public static void gatherData(GatherDataEvent event) {
         DataGenerator generator = event.getGenerator();
 
-        if( event.includeServer() ) {
+        if (event.includeServer()) {
             generator.addProvider(new GeneratorRecipes(generator));
         }
 
-        if( event.includeClient() ) {
+        if (event.includeClient()) {
             generator.addProvider(new GeneratorLanguage(generator));
             generator.addProvider(new GeneratorBlockStates(generator, event.getExistingFileHelper()));
             generator.addProvider(new GeneratorItemModels(generator, event.getExistingFileHelper()));
@@ -57,23 +57,24 @@ public final class Generators {
         protected void registerStatesAndModels() {
             ResourceLocation side = modLoc("blocks/charging_station_side");
             // Sorry for the formatting on this one, it's because we have to define all the sides :(
-            getVariantBuilder(ModBlocks.CHARGING_STATION.get()).partialState().with(ChargingStationBlock.LIT, false).addModels(
-                    ConfiguredModel.builder().modelFile(cube(
-                            ModBlocks.CHARGING_STATION.get().getRegistryName().getPath(),
-                            modLoc("blocks/charging_station_bottom"),
-                            modLoc("blocks/charging_station_top"),
-                            modLoc("blocks/charging_station_frontoff"),
-                            side, side, side
-                    ).texture("particle", side)).build()
-            ).with(ChargingStationBlock.LIT, true).addModels(
-                    ConfiguredModel.builder().modelFile(cube(
-                            ModBlocks.CHARGING_STATION.get().getRegistryName().getPath(),
-                            modLoc("blocks/charging_station_bottom"),
-                            modLoc("blocks/charging_station_top"),
-                            modLoc("blocks/charging_station_fronton"),
-                            side, side, side
-                    ).texture("particle", side)).build()
-            );
+            getVariantBuilder(ModBlocks.CHARGING_STATION.get())
+                    .partialState().with(ChargingStationBlock.LIT, false).addModels(ConfiguredModel.builder().modelFile(
+                            cube(
+                                ModBlocks.CHARGING_STATION.get().getRegistryName().getPath() + "_off",
+                                modLoc("blocks/charging_station_bottom"),
+                                modLoc("blocks/charging_station_top"),
+                                modLoc("blocks/charging_station_frontoff"),
+                                side, side, side
+                            ).texture("particle", side)
+                    ).build()).partialState().with(ChargingStationBlock.LIT, true).addModels(ConfiguredModel.builder().modelFile(
+                            cube(
+                                ModBlocks.CHARGING_STATION.get().getRegistryName().getPath() + "_on",
+                                modLoc("blocks/charging_station_bottom"),
+                                modLoc("blocks/charging_station_top"),
+                                modLoc("blocks/charging_station_fronton"),
+                                side, side, side
+                            ).texture("particle", side)
+                    ).build());
         }
     }
 }

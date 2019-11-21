@@ -34,6 +34,7 @@ public class ChargingGadgets
     public ChargingGadgets() {
         IEventBus event = FMLJavaModLoadingContext.get().getModEventBus();
 
+        ModBlocks.ITEMS.register(event);
         ModBlocks.BLOCKS.register(event);
         ModBlocks.TILES_ENTITIES.register(event);
 

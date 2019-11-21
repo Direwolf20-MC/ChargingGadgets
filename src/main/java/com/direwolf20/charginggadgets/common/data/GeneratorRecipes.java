@@ -1,6 +1,7 @@
 package com.direwolf20.charginggadgets.common.data;
 
 import com.direwolf20.charginggadgets.common.blocks.ModBlocks;
+import net.minecraft.block.Block;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.IFinishedRecipe;
 import net.minecraft.data.RecipeProvider;
@@ -16,7 +17,9 @@ public final class GeneratorRecipes extends RecipeProvider {
 
     @Override
     protected void registerRecipes(Consumer<IFinishedRecipe> consumer) {
-        ShapedRecipeBuilder.shapedRecipe(ModBlocks.CHARGING_STATION.get())
+        Block block = ModBlocks.CHARGING_STATION.get();
+        ShapedRecipeBuilder
+                .shapedRecipe(block)
                 .key('i', Tags.Items.INGOTS_GOLD)
                 .key('r', Tags.Items.DUSTS_REDSTONE)
                 .key('l', Tags.Items.GEMS_LAPIS)
