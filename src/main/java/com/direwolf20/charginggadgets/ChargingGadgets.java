@@ -1,7 +1,9 @@
 package com.direwolf20.charginggadgets;
 
+import com.direwolf20.charginggadgets.common.blocks.ModBlocks;
 import net.minecraft.block.Blocks;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -17,8 +19,13 @@ public class ChargingGadgets
     private static final Logger LOGGER = LogManager.getLogger();
 
     public ChargingGadgets() {
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::clientSetup);
+        IEventBus event = FMLJavaModLoadingContext.get().getModEventBus();
+
+        ModBlocks.BLOCKS.register(event);
+        ModBlocks.TILES_ENTITIES.register(event);
+
+        event.addListener(this::setup);
+        event.addListener(this::clientSetup);
 
         MinecraftForge.EVENT_BUS.register(this);
     }
@@ -28,7 +35,6 @@ public class ChargingGadgets
     }
 
     private void clientSetup(final FMLClientSetupEvent event) {
-        // do something that can only be done on the client
     }
 
     public static Logger getLogger() {
