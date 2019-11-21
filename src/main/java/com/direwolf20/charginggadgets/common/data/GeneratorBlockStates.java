@@ -29,10 +29,10 @@ final class GeneratorBlockStates extends BlockStateProvider {
         ).texture("particle", side);
 
         ModelBuilder off = cube(
-                ModBlocks.CHARGING_STATION.get().getRegistryName().getPath() + "_on",
+                ModBlocks.CHARGING_STATION.get().getRegistryName().getPath(),
                 modLoc("blocks/charging_station_bottom"),
                 modLoc("blocks/charging_station_top"),
-                modLoc("blocks/charging_station_fronton"),
+                modLoc("blocks/charging_station_frontoff"),
                 side, side, side
         ).texture("particle", side);
 
