@@ -36,7 +36,9 @@ public class ChargingStationBlock extends Block {
 
     @Override
     protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
-        super.fillStateContainer(builder.add(FACING).add(LIT));
+        super.fillStateContainer(builder);
+        builder.add(FACING);
+        builder.add(LIT);
     }
 
     @Nullable
