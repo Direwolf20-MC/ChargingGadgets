@@ -1,12 +1,15 @@
 package com.direwolf20.charginggadgets.common.blocks;
 
+import com.direwolf20.charginggadgets.ChargingGadgets;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.container.INamedContainerProvider;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.BlockItemUseContext;
+import net.minecraft.item.ItemStack;
 import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.DirectionProperty;
 import net.minecraft.state.StateContainer;
@@ -66,5 +69,9 @@ public class ChargingStationBlock extends Block {
     @Override
     public boolean hasTileEntity(BlockState state) {
         return true;
+    }
+
+    public static BlockItem asBlockItem() {
+        return new BlockItem(new ChargingStationBlock(), ChargingGadgets.ITEM_PROPS);
     }
 }

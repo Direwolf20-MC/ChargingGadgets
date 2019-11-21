@@ -2,6 +2,9 @@ package com.direwolf20.charginggadgets;
 
 import com.direwolf20.charginggadgets.common.blocks.ModBlocks;
 import net.minecraft.block.Blocks;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemGroup;
+import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
@@ -17,6 +20,16 @@ public class ChargingGadgets
 {
     public static final String MOD_ID = "charginggadgets";
     private static final Logger LOGGER = LogManager.getLogger();
+
+    // Item Groups
+    public static final ItemGroup ITEM_GROUP = new ItemGroup(MOD_ID) {
+        @Override
+        public ItemStack createIcon() {
+            return new ItemStack(ModBlocks.CHARGING_STATION.get());
+        }
+    };
+
+    public static final Item.Properties ITEM_PROPS = new Item.Properties().group(ITEM_GROUP);
 
     public ChargingGadgets() {
         IEventBus event = FMLJavaModLoadingContext.get().getModEventBus();
