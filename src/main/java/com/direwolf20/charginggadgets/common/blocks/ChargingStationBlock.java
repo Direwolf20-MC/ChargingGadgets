@@ -1,6 +1,7 @@
 package com.direwolf20.charginggadgets.common.blocks;
 
 import com.direwolf20.charginggadgets.ChargingGadgets;
+import com.direwolf20.charginggadgets.common.tiles.ChargingStationTile;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.material.Material;
@@ -19,6 +20,7 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.network.NetworkHooks;
 
@@ -61,11 +63,17 @@ public class ChargingStationBlock extends Block {
             return ActionResultType.SUCCESS;
 
         TileEntity te = worldIn.getTileEntity(pos);
-//        if (! (te instanceof ChargingStationTileEntity))
-//            return false;
+        if (! (te instanceof ChargingStationTile))
+            return ActionResultType.FAIL;
 
         NetworkHooks.openGui((ServerPlayerEntity) player, (INamedContainerProvider) te, pos);
         return ActionResultType.SUCCESS;
+    }
+
+    @Nullable
+    @Override
+    public TileEntity createTileEntity(BlockState state, IBlockReader world) {
+        return ModBlocks.CHARGING_STATION_TILE.get().create();
     }
 
     @Override
