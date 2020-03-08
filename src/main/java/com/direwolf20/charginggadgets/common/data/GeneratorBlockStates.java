@@ -3,7 +3,6 @@ package com.direwolf20.charginggadgets.common.data;
 import com.direwolf20.charginggadgets.ChargingGadgets;
 import com.direwolf20.charginggadgets.common.blocks.ChargingStationBlock;
 import com.direwolf20.charginggadgets.common.blocks.ModBlocks;
-import net.minecraft.client.renderer.model.BlockPartRotation;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
@@ -20,7 +19,7 @@ final class GeneratorBlockStates extends BlockStateProvider {
     @Override
     protected void registerStatesAndModels() {
         ResourceLocation side = modLoc("blocks/charging_station_side");
-        ModelBuilder on = cube(
+        ModelBuilder on = models().cube(
                 ModBlocks.CHARGING_STATION.get().getRegistryName().getPath() + "_on",
                 modLoc("blocks/charging_station_bottom"),
                 modLoc("blocks/charging_station_top"),
@@ -28,7 +27,7 @@ final class GeneratorBlockStates extends BlockStateProvider {
                 side, side, side
         ).texture("particle", side);
 
-        ModelBuilder off = cube(
+        ModelBuilder off = models().cube(
                 ModBlocks.CHARGING_STATION.get().getRegistryName().getPath(),
                 modLoc("blocks/charging_station_bottom"),
                 modLoc("blocks/charging_station_top"),

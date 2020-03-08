@@ -9,12 +9,12 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.item.ItemStack;
 import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.DirectionProperty;
 import net.minecraft.state.StateContainer;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
@@ -55,17 +55,17 @@ public class ChargingStationBlock extends Block {
 
     @Override
     @SuppressWarnings("deprecation")
-    public boolean onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult blockRayTraceResult) {
+    public ActionResultType onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult blockRayTraceResult) {
         // Only execute on the server
         if (worldIn.isRemote)
-            return true;
+            return ActionResultType.SUCCESS;
 
         TileEntity te = worldIn.getTileEntity(pos);
 //        if (! (te instanceof ChargingStationTileEntity))
 //            return false;
 
         NetworkHooks.openGui((ServerPlayerEntity) player, (INamedContainerProvider) te, pos);
-        return true;
+        return ActionResultType.SUCCESS;
     }
 
     @Override
