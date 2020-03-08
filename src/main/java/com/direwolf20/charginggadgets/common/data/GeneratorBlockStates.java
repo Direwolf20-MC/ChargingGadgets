@@ -4,6 +4,8 @@ import com.direwolf20.charginggadgets.ChargingGadgets;
 import com.direwolf20.charginggadgets.common.blocks.ChargingStationBlock;
 import com.direwolf20.charginggadgets.common.blocks.ModBlocks;
 import net.minecraft.data.DataGenerator;
+import net.minecraft.state.DirectionProperty;
+import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.model.generators.BlockStateProvider;
@@ -18,6 +20,8 @@ final class GeneratorBlockStates extends BlockStateProvider {
 
     @Override
     protected void registerStatesAndModels() {
+        assert ModBlocks.CHARGING_STATION.get().getRegistryName() != null;
+
         ResourceLocation side = modLoc("blocks/charging_station_side");
         ModelBuilder on = models().cube(
                 ModBlocks.CHARGING_STATION.get().getRegistryName().getPath() + "_on",
@@ -35,15 +39,12 @@ final class GeneratorBlockStates extends BlockStateProvider {
                 side, side, side
         ).texture("particle", side);
 
-        // Sorry for the formatting on this one, it's because we have to define all the sides :(
         getVariantBuilder(ModBlocks.CHARGING_STATION.get())
-                .partialState().with(ChargingStationBlock.FACING, Direction.NORTH)  .with(ChargingStationBlock.LIT, true)   .setModels(ConfiguredModel.builder().modelFile(on).build())
-                .partialState().with(ChargingStationBlock.FACING, Direction.SOUTH)  .with(ChargingStationBlock.LIT, true)   .setModels(ConfiguredModel.builder().modelFile(on).rotationY(180).build())
-                .partialState().with(ChargingStationBlock.FACING, Direction.WEST)   .with(ChargingStationBlock.LIT, true)   .setModels(ConfiguredModel.builder().modelFile(on).rotationY(270).build())
-                .partialState().with(ChargingStationBlock.FACING, Direction.EAST)   .with(ChargingStationBlock.LIT, true)   .setModels(ConfiguredModel.builder().modelFile(on).rotationY(90).build())
-                .partialState().with(ChargingStationBlock.FACING, Direction.NORTH)  .with(ChargingStationBlock.LIT, false)  .setModels(ConfiguredModel.builder().modelFile(off).build())
-                .partialState().with(ChargingStationBlock.FACING, Direction.SOUTH)  .with(ChargingStationBlock.LIT, false)  .setModels(ConfiguredModel.builder().modelFile(off).rotationY(180).build())
-                .partialState().with(ChargingStationBlock.FACING, Direction.WEST)   .with(ChargingStationBlock.LIT, false)  .setModels(ConfiguredModel.builder().modelFile(off).rotationY(270).build())
-                .partialState().with(ChargingStationBlock.FACING, Direction.EAST)   .with(ChargingStationBlock.LIT, false)  .setModels(ConfiguredModel.builder().modelFile(off).rotationY(90).build());
+                .forAllStates(state -> {
+                    Direction dir = state.get(ChargingStationBlock.FACING);
+                    return ConfiguredModel.builder().modelFile(state.get(ChargingStationBlock.LIT) ? on : off).rotationY(
+                            dir.getAxis().isVertical() ? 0 : (((int) dir.getHorizontalAngle()) + 180) % 360
+                    ).build();
+                });
     }
 }
