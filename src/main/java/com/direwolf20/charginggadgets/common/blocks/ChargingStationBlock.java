@@ -49,12 +49,6 @@ public class ChargingStationBlock extends Block {
 
     @Override
     @SuppressWarnings("deprecation")
-    public int getLightValue(BlockState state) {
-        return state.get(LIT) ? 14 : 0;
-    }
-
-    @Override
-    @SuppressWarnings("deprecation")
     public ActionResultType onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult blockRayTraceResult) {
         // Only execute on the server
         if (worldIn.isRemote)
