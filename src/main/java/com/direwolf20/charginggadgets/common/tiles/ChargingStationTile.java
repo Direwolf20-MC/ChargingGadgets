@@ -32,20 +32,27 @@ public class ChargingStationTile extends TileEntity implements ITickableTileEnti
         CHARGE(1);
 
         int id;
-        Slots(int number) { id = number; }
+
+        Slots(int number) {
+            id = number;
+        }
     }
 
     private LazyOptional<IEnergyStorage> energyCapability;
     private LazyOptional<IItemHandler> itemHandlerCapability;
     private ChargerItemHandler itemHandler;
     private EnergyStorage energy;
+    private static final int FUEL_SLOT = 0;
+    private static final int CHARGE_SLOT = 1;
+    private int counter = 0;
+    private int maxBurn = 0;
 
     public ChargingStationTile() {
         super(ModBlocks.CHARGING_STATION_TILE.get());
 
         itemHandler = new ChargerItemHandler();
         itemHandlerCapability = LazyOptional.of(() -> itemHandler);
-        energy = new EnergyStorage(1500000){
+        energy = new EnergyStorage(1500000) {
             @Override
             public int extractEnergy(int maxExtract, boolean simulate) {
                 return 0;
@@ -70,17 +77,17 @@ public class ChargingStationTile extends TileEntity implements ITickableTileEnti
         energyCapability.invalidate();
     }
 
-    public int getRemainingBurn() {
-        return 0;
-    }
-
-    public int getMaxBurn() {
-        return 0;
-    }
-
     @Override
     public ITextComponent getDisplayName() {
         return new StringTextComponent("Charging Station Tile");
+    }
+
+    public int getRemainingBurn() {
+        return counter;
+    }
+
+    public int getMaxBurn() {
+        return maxBurn;
     }
 
     @Nullable
@@ -91,16 +98,99 @@ public class ChargingStationTile extends TileEntity implements ITickableTileEnti
 
     @Override
     public void tick() {
-//        energy.receiveEnergy(1, false);
+        if (getWorld() != null) {
+            tryBurn();
+
+            ItemStack stack = getChargeStack();
+            if (!stack.isEmpty())
+                chargeItem(stack);
+
+            //todo AT the cached BlockState, so that we can reset it if necessary
+
+        } else if (getWorld() != null) {
+            tryBurn();
+
+            ItemStack stack = getChargeStack();
+            if (!stack.isEmpty()) {
+                chargeItem(stack);
+                //updateLightning();
+            }
+        }
+        //getEnergy().resetReceiveCap();
+    }
+
+    @Nonnull
+    private EnergyStorage getEnergy() {
+        return energy;
+    }
+
+    private void chargeItem(ItemStack stack) {
+        stack.getCapability(CapabilityEnergy.ENERGY).ifPresent(chargingStorage -> {
+            if (isChargingItem(chargingStorage))
+                addEnergy(chargingStorage.receiveEnergy(Math.min(getEnergy().getEnergyStored(), 2500), false) * -1); //I know it looks stupid it just didn't work any other way lol
+        });
+    }
+
+    public boolean isChargingItem(IEnergyStorage energy) {
+        return getEnergy().getEnergyStored() > 0 && energy.receiveEnergy(getEnergy().getEnergyStored(), true) > 0;
+    }
+
+    private void tryBurn() {
+        assert getWorld() != null;
+        boolean canInsertEnergy = getEnergy().receiveEnergy(2500, true) > 0;
+        if (counter > 0 && canInsertEnergy) {
+            burn();
+        } else if (canInsertEnergy) {
+            if (initBurn())
+                burn();
+        }
+    }
+
+    private void addEnergy(int amount) {
+        energy.receiveEnergy(amount, false);
+    }
+
+    private void burn() {
+        addEnergy(2500);
+        counter--;
+        if (counter == 0) {
+            maxBurn = 0;
+            initBurn();
+        }
+    }
+
+    private boolean initBurn() {
+        ItemStack stack = getFuelStack();
+        int burnTime = ForgeHooks.getBurnTime(stack);
+        if (burnTime > 0) {
+            getItemStackHandler().extractItem(0, 1, false);
+            counter = (int) Math.floor(burnTime) / 50;
+            maxBurn = counter;
+            return true;
+        }
+        return false;
+    }
+
+    @Nonnull
+    private ItemStackHandler getItemStackHandler() {
+        return itemHandler;
+    }
+
+    private ItemStack getChargeStack() {
+        return getItemStackHandler().getStackInSlot(CHARGE_SLOT);
+    }
+
+    public ItemStack getFuelStack() {
+        return getItemStackHandler().getStackInSlot(FUEL_SLOT);
     }
 
     @Override
     public void read(CompoundNBT compound) {
         super.read(compound);
-        if( compound.contains("items") )
+        if (compound.contains("items"))
             itemHandler.deserializeNBT(compound.getCompound("items"));
 
-        if( compound.contains("energy") )
+        if (compound.contains("energy"))
             energy.receiveEnergy(compound.getInt("energy"), false);
     }
 
