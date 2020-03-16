@@ -206,4 +206,8 @@ public class ChargingStationTile extends TileEntity implements ITickableTileEnti
     public int getMaxBurn() {
         return maxBurn;
     }
+
+    public LazyOptional<ChargerEnergyStorage> getEnergy() {
+        return energy;
+    }
 }

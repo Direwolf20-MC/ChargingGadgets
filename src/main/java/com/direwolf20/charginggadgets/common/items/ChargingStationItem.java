@@ -1,27 +1,28 @@
 package com.direwolf20.charginggadgets.common.items;
 
 import com.direwolf20.charginggadgets.common.capabilities.ItemEnergyStorage;
+import com.direwolf20.charginggadgets.common.tiles.ChargingStationTile;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.energy.CapabilityEnergy;
-import net.minecraftforge.energy.IEnergyStorage;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.function.IntSupplier;
 
 public class ChargingStationItem extends BlockItem {
 
@@ -33,8 +34,19 @@ public class ChargingStationItem extends BlockItem {
     public void addInformation(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
         super.addInformation(stack, worldIn, tooltip, flagIn);
         stack.getCapability(CapabilityEnergy.ENERGY).ifPresent(energy -> {
-            tooltip.add(new StringTextComponent("Energry: " + energy.getEnergyStored()));
+            tooltip.add(new StringTextComponent("Energy: " + energy.getEnergyStored()));
         });
+    }
+
+    @Override
+    protected boolean onBlockPlaced(BlockPos pos, World worldIn, @Nullable PlayerEntity player, ItemStack stack, BlockState state) {
+        TileEntity te = worldIn.getTileEntity(pos);
+        if (te instanceof ChargingStationTile) {
+            ChargingStationTile station = (ChargingStationTile) te;
+            station.getEnergy().ifPresent(e -> stack.getCapability(CapabilityEnergy.ENERGY).ifPresent(a -> e.receiveEnergy(a.getEnergyStored(), false)));
+        }
+
+        return super.onBlockPlaced(pos, worldIn, player, stack, state);
     }
 
     @Nullable
