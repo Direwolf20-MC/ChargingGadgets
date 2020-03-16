@@ -1,6 +1,8 @@
 package com.direwolf20.charginggadgets.common.tiles;
 
 import com.direwolf20.charginggadgets.common.blocks.ModBlocks;
+import com.direwolf20.charginggadgets.common.capabilities.ChargerEnergyStorage;
+import com.direwolf20.charginggadgets.common.capabilities.ChargerItemHandler;
 import com.direwolf20.charginggadgets.common.container.ChargingStationContainer;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -21,14 +23,13 @@ import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.EnergyStorage;
 import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class ChargingStationTile extends TileEntity implements ITickableTileEntity, INamedContainerProvider {
-    private enum Slots {
+    public enum Slots {
         FUEL(0),
         CHARGE(1);
 
@@ -37,50 +38,42 @@ public class ChargingStationTile extends TileEntity implements ITickableTileEnti
         Slots(int number) {
             id = number;
         }
+
+        public int getId() {
+            return id;
+        }
     }
 
-    private LazyOptional<IEnergyStorage> energyCapability = LazyOptional.of(this::createEnergy);
-    private LazyOptional<IItemHandler> itemHandlerCapability = LazyOptional.of(this::createHandler);
+    private LazyOptional<ChargerEnergyStorage> energyCapability;
+    private LazyOptional<ItemStackHandler> itemHandlerCapability;
     private ChargerItemHandler itemHandler;
-    private EnergyStorage energy;
-    private static final int FUEL_SLOT = 0;
-    private static final int CHARGE_SLOT = 1;
+    private ChargerEnergyStorage energy;
+
     private int counter = 0;
     private int maxBurn = 0;
 
     public ChargingStationTile() {
         super(ModBlocks.CHARGING_STATION_TILE.get());
 
-        itemHandler = new ChargerItemHandler();
+        itemHandler = new ChargerItemHandler(this);
         itemHandlerCapability = LazyOptional.of(() -> itemHandler);
-        energy = new EnergyStorage(1500000);
+        energy = new ChargerEnergyStorage(1500000);
         energyCapability = LazyOptional.of(() -> energy);
-    }
-
-    private IItemHandler createHandler() {
-        itemHandler = new ChargerItemHandler();
-        return itemHandler;
-    }
-
-    private IEnergyStorage createEnergy() {
-        energy = new EnergyStorage(1500000);
-        return energy;
-
     }
 
     @Override
     public void onLoad() {
-        if (!itemHandlerCapability.isPresent())
-            itemHandlerCapability = LazyOptional.of(() -> itemHandler);
-
-        if (!energyCapability.isPresent())
-            energyCapability = LazyOptional.of(() -> energy);
+//        if (!itemHandlerCapability.isPresent())
+//            itemHandlerCapability = LazyOptional.of(() -> itemHandler);
+//
+//        if (!energyCapability.isPresent())
+//            energyCapability = LazyOptional.of(() -> energy);
     }
 
     @Override
     public void onChunkUnloaded() {
-        itemHandlerCapability.invalidate();
-        energyCapability.invalidate();
+//        itemHandlerCapability.invalidate();
+//        energyCapability.invalidate();
     }
 
     @Override
@@ -104,46 +97,37 @@ public class ChargingStationTile extends TileEntity implements ITickableTileEnti
 
     @Override
     public void tick() {
-        if (getWorld() != null) {
-            tryBurn();
+        if (getWorld() == null)
+            return;
 
-            ItemStack stack = getChargeStack();
-            if (!stack.isEmpty())
-                chargeItem(stack);
+        tryBurn();
 
-            //todo AT the cached BlockState, so that we can reset it if necessary
+        ItemStack stack = itemHandler.getStackInSlot(Slots.CHARGE.id);
+        if (!stack.isEmpty())
+            chargeItem(stack);
 
-        } else if (getWorld() != null) {
-            tryBurn();
-
-            ItemStack stack = getChargeStack();
-            if (!stack.isEmpty()) {
-                chargeItem(stack);
-                //updateLightning();
-            }
-        }
-        //getEnergy().resetReceiveCap();
-    }
-
-    @Nonnull
-    private EnergyStorage getEnergy() {
-        return energy;
+//        getEnergy().resetReceiveCap();
     }
 
     private void chargeItem(ItemStack stack) {
-        stack.getCapability(CapabilityEnergy.ENERGY).ifPresent(chargingStorage -> {
-            if (isChargingItem(chargingStorage))
-                addEnergy(chargingStorage.receiveEnergy(Math.min(getEnergy().getEnergyStored(), 2500), false) * -1); //I know it looks stupid it just didn't work any other way lol
+        stack.getCapability(CapabilityEnergy.ENERGY).ifPresent(itemEnergy -> {
+            if (!isChargingItem(itemEnergy))
+                return;
+
+            int energyRemoved = itemEnergy.receiveEnergy(Math.min(energy.getEnergyStored(), 2500), false);
+            energy.internalExtractEnergy(energyRemoved, false);
         });
     }
 
     public boolean isChargingItem(IEnergyStorage energy) {
-        return getEnergy().getEnergyStored() > 0 && energy.receiveEnergy(getEnergy().getEnergyStored(), true) > 0;
+        return energy.getEnergyStored() >= 0 && energy.receiveEnergy(energy.getEnergyStored(), true) >= 0;
     }
 
     private void tryBurn() {
-        assert getWorld() != null;
-        boolean canInsertEnergy = getEnergy().receiveEnergy(2500, true) > 0;
+        if( world == null )
+            return;
+
+        boolean canInsertEnergy = energy.receiveEnergy(2500, true) > 0;
         if (counter > 0 && canInsertEnergy) {
             burn();
         } else if (canInsertEnergy) {
@@ -152,12 +136,10 @@ public class ChargingStationTile extends TileEntity implements ITickableTileEnti
         }
     }
 
-    private void addEnergy(int amount) {
-        energy.receiveEnergy(amount, false);
-    }
 
     private void burn() {
-        addEnergy(2500);
+        energy.receiveEnergy(2500, false);
+
         counter--;
         if (counter == 0) {
             maxBurn = 0;
@@ -166,10 +148,10 @@ public class ChargingStationTile extends TileEntity implements ITickableTileEnti
     }
 
     private boolean initBurn() {
-        ItemStack stack = getFuelStack();
+        ItemStack stack = itemHandler.getStackInSlot(Slots.FUEL.id);
         int burnTime = ForgeHooks.getBurnTime(stack);
         if (burnTime > 0) {
-            getItemStackHandler().extractItem(0, 1, false);
+            itemHandler.extractItem(0, 1, false);
             counter = (int) Math.floor(burnTime) / 50;
             maxBurn = counter;
             return true;
@@ -177,42 +159,31 @@ public class ChargingStationTile extends TileEntity implements ITickableTileEnti
         return false;
     }
 
-    @Nonnull
-    private ItemStackHandler getItemStackHandler() {
-        return itemHandler;
-    }
-
-    private ItemStack getChargeStack() {
-        return getItemStackHandler().getStackInSlot(CHARGE_SLOT);
-    }
-
-    public ItemStack getFuelStack() {
-        return getItemStackHandler().getStackInSlot(FUEL_SLOT);
-    }
-
     @Override
     public void read(CompoundNBT compound) {
         CompoundNBT invTag = compound.getCompound("inv");
-        itemHandlerCapability.ifPresent(h -> ((INBTSerializable<CompoundNBT>) h).deserializeNBT(invTag));
+        itemHandlerCapability.ifPresent(h -> h.deserializeNBT(invTag));
         CompoundNBT energyTag = compound.getCompound("energy");
         energyCapability.ifPresent(h -> ((INBTSerializable<CompoundNBT>) h).deserializeNBT(energyTag));
         counter = compound.getInt("counter");
         maxBurn = compound.getInt("maxburn");
+        System.out.println(compound);
         super.read(compound);
     }
 
     @Override
     public CompoundNBT write(CompoundNBT compound) {
         itemHandlerCapability.ifPresent(h -> {
-            CompoundNBT compoundItem = ((INBTSerializable<CompoundNBT>) h).serializeNBT();
+            CompoundNBT compoundItem = h.serializeNBT();
             compound.put("inv", compoundItem);
         });
         energyCapability.ifPresent(h -> {
-            CompoundNBT compoundEnergy = ((INBTSerializable<CompoundNBT>) h).serializeNBT();
+            CompoundNBT compoundEnergy = h.serializeNBT();
             compound.put("energy", compoundEnergy);
         });
         compound.putInt("counter", counter);
         compound.putInt("maxburn", maxBurn);
+        System.out.println(compound);
         return super.write(compound);
     }
 
@@ -228,26 +199,4 @@ public class ChargingStationTile extends TileEntity implements ITickableTileEnti
         return super.getCapability(cap, side);
     }
 
-    class ChargerItemHandler extends ItemStackHandler {
-        public ChargerItemHandler() {
-            super(2);
-        }
-
-        @Override
-        protected void onContentsChanged(int slot) {
-            ChargingStationTile.this.markDirty();
-        }
-
-        @Nonnull
-        @Override
-        public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
-            if (slot == Slots.FUEL.id && ForgeHooks.getBurnTime(stack) <= 0)
-                return stack;
-
-            if (slot == Slots.CHARGE.id && (! stack.getCapability(CapabilityEnergy.ENERGY).isPresent() || getStackInSlot(slot).getCount() > 0))
-                return stack;
-
-            return super.insertItem(slot, stack, simulate);
-        }
-    }
 }
