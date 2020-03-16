@@ -11,7 +11,6 @@ public class ChargerEnergyStorage extends EnergyStorage implements INBTSerializa
 
     public ChargerEnergyStorage(ChargingStationTile tile, int capacity) {
         super(capacity, Integer.MAX_VALUE);
-        System.out.println(this.energy);
         this.tile = tile;
     }
 
@@ -42,16 +41,14 @@ public class ChargerEnergyStorage extends EnergyStorage implements INBTSerializa
 
     @Override
     public CompoundNBT serializeNBT() {
-        System.out.println(energy);
         CompoundNBT tag = new CompoundNBT();
         tag.putInt(KEY, getEnergyStored());
-        System.out.println(getEnergyStored());
         return tag;
     }
 
     @Override
     public void deserializeNBT(CompoundNBT nbt) {
         setEnergy(nbt.getInt(KEY));
-        System.out.println(nbt);
+
     }
 }

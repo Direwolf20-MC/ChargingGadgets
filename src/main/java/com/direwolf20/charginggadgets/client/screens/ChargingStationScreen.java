@@ -39,7 +39,6 @@ public class ChargingStationScreen  extends ContainerScreen<ChargingStationConta
 
         this.renderHoveredToolTip(mouseX, mouseY);
 
-        //System.out.println(this.container.getEnergy());
         if (mouseX > (guiLeft + 7) && mouseX < (guiLeft + 7) + 18 && mouseY > (guiTop + 7) && mouseY < (guiTop + 7) + 73)
             this.renderTooltip(Arrays.asList(
                     String.format("Energy: %s FE", withSuffix(this.container.getEnergy())),

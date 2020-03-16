@@ -73,6 +73,7 @@ public class ChargingStationTile extends TileEntity implements ITickableTileEnti
     @Override
     public Container createMenu(int i, PlayerInventory playerInventory, PlayerEntity playerEntity) {
         assert world != null;
+        energy.ifPresent(e -> System.out.println(e.getEnergyStored()));
         return new ChargingStationContainer(i, world, pos, playerInventory, playerEntity);
     }
 
@@ -148,6 +149,7 @@ public class ChargingStationTile extends TileEntity implements ITickableTileEnti
 
     @Override
     public void read(CompoundNBT compound) {
+        super.read(compound);
         CompoundNBT invTag = compound.getCompound("inv");
         inventory.ifPresent(h -> h.deserializeNBT(invTag));
         CompoundNBT energyTag = compound.getCompound("energy");
@@ -155,7 +157,6 @@ public class ChargingStationTile extends TileEntity implements ITickableTileEnti
         counter = compound.getInt("counter");
         maxBurn = compound.getInt("maxburn");
         System.out.println(compound);
-        super.read(compound);
     }
 
     @Override
@@ -193,22 +194,11 @@ public class ChargingStationTile extends TileEntity implements ITickableTileEnti
         return new StringTextComponent("Charging Station Tile");
     }
 
-
     public int getRemainingBurn() {
         return counter;
     }
 
     public int getMaxBurn() {
         return maxBurn;
-    }
-
-
-
-    @Override
-    public void markDirty() {
-        System.out.println("dirty");
-        System.out.println(this.getTileData());
-        energy.ifPresent(e -> System.out.println(e.getEnergyStored()));
-        super.markDirty();
     }
 }
