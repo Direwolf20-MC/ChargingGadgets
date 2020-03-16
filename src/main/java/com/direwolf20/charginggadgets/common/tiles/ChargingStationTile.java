@@ -10,6 +10,8 @@ import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.NetworkManager;
+import net.minecraft.network.play.server.SUpdateTileEntityPacket;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
@@ -73,8 +75,7 @@ public class ChargingStationTile extends TileEntity implements ITickableTileEnti
     @Override
     public Container createMenu(int i, PlayerInventory playerInventory, PlayerEntity playerEntity) {
         assert world != null;
-        energy.ifPresent(e -> System.out.println(e.getEnergyStored()));
-        return new ChargingStationContainer(i, world, pos, playerInventory, playerEntity);
+        return new ChargingStationContainer(this, i, playerInventory);
     }
 
     @Override
@@ -150,13 +151,11 @@ public class ChargingStationTile extends TileEntity implements ITickableTileEnti
     @Override
     public void read(CompoundNBT compound) {
         super.read(compound);
-        CompoundNBT invTag = compound.getCompound("inv");
-        inventory.ifPresent(h -> h.deserializeNBT(invTag));
-        CompoundNBT energyTag = compound.getCompound("energy");
-        energy.ifPresent(h -> h.deserializeNBT(energyTag));
+
+        inventory.ifPresent(h -> h.deserializeNBT(compound.getCompound("inv")));
+        energy.ifPresent(h -> h.deserializeNBT(compound.getCompound("energy")));
         counter = compound.getInt("counter");
         maxBurn = compound.getInt("maxburn");
-        System.out.println(compound);
     }
 
     @Override
@@ -166,7 +165,6 @@ public class ChargingStationTile extends TileEntity implements ITickableTileEnti
 
         compound.putInt("counter", counter);
         compound.putInt("maxburn", maxBurn);
-        System.out.println(compound);
         return super.write(compound);
     }
 
@@ -180,6 +178,27 @@ public class ChargingStationTile extends TileEntity implements ITickableTileEnti
             return energy.cast();
 
         return super.getCapability(cap, side);
+    }
+
+    @Override
+    public SUpdateTileEntityPacket getUpdatePacket() {
+        // Vanilla uses the type parameter to indicate which type of tile entity (command block, skull, or beacon?) is receiving the packet, but it seems like Forge has overridden this behavior
+        return new SUpdateTileEntityPacket(pos, 0, getUpdateTag());
+    }
+
+    @Override
+    public CompoundNBT getUpdateTag() {
+        return write(new CompoundNBT());
+    }
+
+    @Override
+    public void handleUpdateTag(CompoundNBT tag) {
+        read(tag);
+    }
+
+    @Override
+    public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
+        read(pkt.getNbtCompound());
     }
 
     @Override

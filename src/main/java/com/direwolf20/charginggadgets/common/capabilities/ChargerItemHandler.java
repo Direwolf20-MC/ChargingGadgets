@@ -19,7 +19,6 @@ public class ChargerItemHandler extends ItemStackHandler {
     @Override
     protected void onContentsChanged(int slot) {
         chargingStationTile.markDirty();
-        System.out.println("Changed");
     }
 
     @Nonnull

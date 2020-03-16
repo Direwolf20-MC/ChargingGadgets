@@ -7,11 +7,9 @@ import net.minecraftforge.energy.EnergyStorage;
 
 public class ChargerEnergyStorage extends EnergyStorage implements INBTSerializable<CompoundNBT> {
     private static final String KEY = "energy";
-    private ChargingStationTile tile;
 
-    public ChargerEnergyStorage(ChargingStationTile tile, int capacity) {
+    public ChargerEnergyStorage(int capacity) {
         super(capacity, Integer.MAX_VALUE);
-        this.tile = tile;
     }
 
     public void setEnergy(int energy) {
@@ -25,17 +23,11 @@ public class ChargerEnergyStorage extends EnergyStorage implements INBTSerializa
     }
 
     public int internalExtractEnergy(int maxExtract, boolean simulate) {
-        if( !simulate)
-            tile.markDirty();
-
         return super.extractEnergy(maxExtract, simulate);
     }
 
     @Override
     public int receiveEnergy(int maxReceive, boolean simulate) {
-        if( !simulate )
-            tile.markDirty();
-
         return super.receiveEnergy(maxReceive, simulate);
     }
 

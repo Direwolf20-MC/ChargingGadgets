@@ -32,23 +32,11 @@ public class ChargingStationContainer extends Container {
         BlockPos pos = extraData.readBlockPos();
         this.tile = (ChargingStationTile) playerInventory.player.world.getTileEntity(pos);
         this.setup(playerInventory);
-
-        trackInt(new IntReferenceHolder() {
-            @Override
-            public int get() {
-                return getEnergy();
-            }
-
-            @Override
-            public void set(int value) {
-                tile.getCapability(CapabilityEnergy.ENERGY).ifPresent(h -> ((ChargerEnergyStorage)h).setEnergy(value));
-            }
-        });
     }
 
-    public ChargingStationContainer(int windowId, World world, BlockPos pos, PlayerInventory playerInventory, PlayerEntity player) {
+    public ChargingStationContainer(ChargingStationTile tile, int windowId, PlayerInventory playerInventory) {
         super(ModBlocks.CHARGING_STATION_CONTAINER.get(), windowId);
-        this.tile = (ChargingStationTile) world.getTileEntity(pos);
+        this.tile = tile;
         this.setup(playerInventory);
     }
 
