@@ -121,7 +121,7 @@ public class ChargingStationTile extends TileEntity implements ITickableTileEnti
 
 
     private void burn(IEnergyStorage energyStorage) {
-        System.out.println(energyStorage.receiveEnergy(2500, false));;
+        energyStorage.receiveEnergy(2500, false);
 
         counter--;
         if (counter == 0) {
@@ -199,5 +199,15 @@ public class ChargingStationTile extends TileEntity implements ITickableTileEnti
 
     public int getMaxBurn() {
         return maxBurn;
+    }
+
+
+
+    @Override
+    public void markDirty() {
+        System.out.println("dirty");
+        System.out.println(this.getTileData());
+        energy.ifPresent(e -> System.out.println(e.getEnergyStored()));
+        super.markDirty();
     }
 }

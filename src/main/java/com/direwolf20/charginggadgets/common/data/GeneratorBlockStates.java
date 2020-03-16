@@ -8,10 +8,7 @@ import net.minecraft.state.DirectionProperty;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.model.generators.BlockStateProvider;
-import net.minecraftforge.client.model.generators.ConfiguredModel;
-import net.minecraftforge.client.model.generators.ExistingFileHelper;
-import net.minecraftforge.client.model.generators.ModelBuilder;
+import net.minecraftforge.client.model.generators.*;
 
 final class GeneratorBlockStates extends BlockStateProvider {
     public GeneratorBlockStates(DataGenerator gen, ExistingFileHelper exFileHelper) {
@@ -23,26 +20,19 @@ final class GeneratorBlockStates extends BlockStateProvider {
         assert ModBlocks.CHARGING_STATION.get().getRegistryName() != null;
 
         ResourceLocation side = modLoc("blocks/charging_station_side");
-        ModelBuilder on = models().cube(
-                ModBlocks.CHARGING_STATION.get().getRegistryName().getPath() + "_on",
+
+        BlockModelBuilder cube = models().cube(
+                ModBlocks.CHARGING_STATION.get().getRegistryName().getPath(),
                 modLoc("blocks/charging_station_bottom"),
                 modLoc("blocks/charging_station_top"),
                 modLoc("blocks/charging_station_fronton"),
                 side, side, side
         ).texture("particle", side);
 
-        ModelBuilder off = models().cube(
-                ModBlocks.CHARGING_STATION.get().getRegistryName().getPath(),
-                modLoc("blocks/charging_station_bottom"),
-                modLoc("blocks/charging_station_top"),
-                modLoc("blocks/charging_station_frontoff"),
-                side, side, side
-        ).texture("particle", side);
-
         getVariantBuilder(ModBlocks.CHARGING_STATION.get())
                 .forAllStates(state -> {
                     Direction dir = state.get(ChargingStationBlock.FACING);
-                    return ConfiguredModel.builder().modelFile(state.get(ChargingStationBlock.LIT) ? on : off).rotationY(
+                    return ConfiguredModel.builder().modelFile(cube).rotationY(
                             dir.getAxis().isVertical() ? 0 : (((int) dir.getHorizontalAngle()) + 180) % 360
                     ).build();
                 });

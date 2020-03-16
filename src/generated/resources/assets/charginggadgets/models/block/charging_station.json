@@ -3,7 +3,7 @@
   "textures": {
     "down": "charginggadgets:blocks/charging_station_bottom",
     "up": "charginggadgets:blocks/charging_station_top",
-    "north": "charginggadgets:blocks/charging_station_frontoff",
+    "north": "charginggadgets:blocks/charging_station_fronton",
     "south": "charginggadgets:blocks/charging_station_side",
     "east": "charginggadgets:blocks/charging_station_side",
     "west": "charginggadgets:blocks/charging_station_side",

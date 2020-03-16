@@ -28,19 +28,17 @@ import javax.annotation.Nullable;
 
 public class ChargingStationBlock extends Block {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
-    public static final BooleanProperty LIT = BlockStateProperties.LIT;
 
     public ChargingStationBlock() {
         super(Properties.create(Material.ROCK));
 
-        setDefaultState(getStateContainer().getBaseState().with(FACING, Direction.NORTH).with(LIT, Boolean.FALSE));
+        setDefaultState(getStateContainer().getBaseState().with(FACING, Direction.NORTH));
     }
 
     @Override
     protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
         super.fillStateContainer(builder);
         builder.add(FACING);
-        builder.add(LIT);
     }
 
     @Nullable
@@ -73,9 +71,5 @@ public class ChargingStationBlock extends Block {
     @Override
     public boolean hasTileEntity(BlockState state) {
         return true;
-    }
-
-    public static BlockItem asBlockItem() {
-        return new BlockItem(new ChargingStationBlock(), ChargingGadgets.ITEM_PROPS);
     }
 }

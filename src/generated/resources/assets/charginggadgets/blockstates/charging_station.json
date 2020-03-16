@@ -1,33 +1,18 @@
 {
   "variants": {
-    "facing=north,lit=false": {
+    "facing=north": {
       "model": "charginggadgets:block/charging_station"
     },
-    "facing=south,lit=false": {
+    "facing=south": {
       "model": "charginggadgets:block/charging_station",
       "y": 180
     },
-    "facing=west,lit=false": {
+    "facing=west": {
       "model": "charginggadgets:block/charging_station",
       "y": 270
     },
-    "facing=east,lit=false": {
+    "facing=east": {
       "model": "charginggadgets:block/charging_station",
-      "y": 90
-    },
-    "facing=north,lit=true": {
-      "model": "charginggadgets:block/charging_station_on"
-    },
-    "facing=south,lit=true": {
-      "model": "charginggadgets:block/charging_station_on",
-      "y": 180
-    },
-    "facing=west,lit=true": {
-      "model": "charginggadgets:block/charging_station_on",
-      "y": 270
-    },
-    "facing=east,lit=true": {
-      "model": "charginggadgets:block/charging_station_on",
       "y": 90
     }
   }

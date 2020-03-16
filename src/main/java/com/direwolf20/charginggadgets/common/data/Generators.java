@@ -14,6 +14,7 @@ public final class Generators {
 
         if (event.includeServer()) {
             generator.addProvider(new GeneratorRecipes(generator));
+            generator.addProvider(new GeneratorLoots(generator));
         }
 
         if (event.includeClient()) {
