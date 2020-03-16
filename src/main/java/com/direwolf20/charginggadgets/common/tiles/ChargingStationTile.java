@@ -30,6 +30,7 @@ import net.minecraftforge.items.ItemStackHandler;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+// Todo: completely rewrite this class from the ground up
 public class ChargingStationTile extends TileEntity implements ITickableTileEntity, INamedContainerProvider {
     public enum Slots {
         FUEL(0),
@@ -46,7 +47,7 @@ public class ChargingStationTile extends TileEntity implements ITickableTileEnti
         }
     }
 
-    private LazyOptional<ChargerEnergyStorage> energy = LazyOptional.of(() -> new ChargerEnergyStorage(this, 1500000));
+    private LazyOptional<ChargerEnergyStorage> energy = LazyOptional.of(() -> new ChargerEnergyStorage(1000000));
     private LazyOptional<ItemStackHandler> inventory  = LazyOptional.of(() -> new ChargerItemHandler(this));
 
     private int counter = 0;
@@ -55,21 +56,6 @@ public class ChargingStationTile extends TileEntity implements ITickableTileEnti
     public ChargingStationTile() {
         super(ModBlocks.CHARGING_STATION_TILE.get());
     }
-
-//    @Override
-//    public void onLoad() {
-////        if (!itemHandlerCapability.isPresent())
-////            itemHandlerCapability = LazyOptional.of(() -> itemHandler);
-////
-////        if (!energyCapability.isPresent())
-////            energyCapability = LazyOptional.of(() -> energy);
-//    }
-//
-//    @Override
-//    public void onChunkUnloaded() {
-////        itemHandlerCapability.invalidate();
-////        energyCapability.invalidate();
-//    }
 
     @Nullable
     @Override

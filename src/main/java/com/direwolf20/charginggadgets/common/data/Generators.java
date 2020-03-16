@@ -1,6 +1,6 @@
 package com.direwolf20.charginggadgets.common.data;
 
-import com.direwolf20.charginggadgets.ChargingGadgets;
+import com.direwolf20.charginggadgets.common.ChargingGadgets;
 import net.minecraft.data.DataGenerator;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;

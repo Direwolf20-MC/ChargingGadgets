@@ -1,8 +1,7 @@
 package com.direwolf20.charginggadgets.client.screens;
 
-import com.direwolf20.charginggadgets.ChargingGadgets;
+import com.direwolf20.charginggadgets.common.ChargingGadgets;
 import com.direwolf20.charginggadgets.common.container.ChargingStationContainer;
-import com.direwolf20.charginggadgets.common.tiles.ChargingStationTile;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
@@ -10,9 +9,7 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.energy.CapabilityEnergy;
-import net.minecraftforge.energy.IEnergyStorage;
 
 import java.awt.*;
 import java.math.BigDecimal;

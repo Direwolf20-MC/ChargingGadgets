@@ -1,13 +1,11 @@
 package com.direwolf20.charginggadgets.common.blocks;
 
-import com.direwolf20.charginggadgets.ChargingGadgets;
+import com.direwolf20.charginggadgets.common.ChargingGadgets;
 import com.direwolf20.charginggadgets.common.container.ChargingStationContainer;
 import com.direwolf20.charginggadgets.common.items.ChargingStationItem;
 import com.direwolf20.charginggadgets.common.tiles.ChargingStationTile;
 import net.minecraft.block.Block;
-import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.ContainerType;
-import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraftforge.common.extensions.IForgeContainerType;

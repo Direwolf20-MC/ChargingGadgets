@@ -1,17 +1,13 @@
-package com.direwolf20.charginggadgets;
+package com.direwolf20.charginggadgets.common;
 
 import com.direwolf20.charginggadgets.client.screens.ChargingStationScreen;
 import com.direwolf20.charginggadgets.common.blocks.ModBlocks;
-import com.direwolf20.charginggadgets.common.container.ChargingStationContainer;
-import com.direwolf20.charginggadgets.common.tiles.ChargingStationTile;
-import net.minecraft.block.Blocks;
 import net.minecraft.client.gui.ScreenManager;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
