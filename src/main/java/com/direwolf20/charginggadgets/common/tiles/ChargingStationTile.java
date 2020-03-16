@@ -15,6 +15,7 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.EnergyStorage;
@@ -38,8 +39,8 @@ public class ChargingStationTile extends TileEntity implements ITickableTileEnti
         }
     }
 
-    private LazyOptional<IEnergyStorage> energyCapability;
-    private LazyOptional<IItemHandler> itemHandlerCapability;
+    private LazyOptional<IEnergyStorage> energyCapability = LazyOptional.of(this::createEnergy);
+    private LazyOptional<IItemHandler> itemHandlerCapability = LazyOptional.of(this::createHandler);
     private ChargerItemHandler itemHandler;
     private EnergyStorage energy;
     private static final int FUEL_SLOT = 0;
@@ -52,14 +53,19 @@ public class ChargingStationTile extends TileEntity implements ITickableTileEnti
 
         itemHandler = new ChargerItemHandler();
         itemHandlerCapability = LazyOptional.of(() -> itemHandler);
-        energy = new EnergyStorage(1500000) {
-            @Override
-            public int extractEnergy(int maxExtract, boolean simulate) {
-                return 0;
-            }
-        };
-
+        energy = new EnergyStorage(1500000);
         energyCapability = LazyOptional.of(() -> energy);
+    }
+
+    private IItemHandler createHandler() {
+        itemHandler = new ChargerItemHandler();
+        return itemHandler;
+    }
+
+    private IEnergyStorage createEnergy() {
+        energy = new EnergyStorage(1500000);
+        return energy;
+
     }
 
     @Override
@@ -186,18 +192,27 @@ public class ChargingStationTile extends TileEntity implements ITickableTileEnti
 
     @Override
     public void read(CompoundNBT compound) {
+        CompoundNBT invTag = compound.getCompound("inv");
+        itemHandlerCapability.ifPresent(h -> ((INBTSerializable<CompoundNBT>) h).deserializeNBT(invTag));
+        CompoundNBT energyTag = compound.getCompound("energy");
+        energyCapability.ifPresent(h -> ((INBTSerializable<CompoundNBT>) h).deserializeNBT(energyTag));
+        counter = compound.getInt("counter");
+        maxBurn = compound.getInt("maxburn");
         super.read(compound);
-        if (compound.contains("items"))
-            itemHandler.deserializeNBT(compound.getCompound("items"));
-
-        if (compound.contains("energy"))
-            energy.receiveEnergy(compound.getInt("energy"), false);
     }
 
     @Override
     public CompoundNBT write(CompoundNBT compound) {
-        compound.put("items", itemHandler.serializeNBT());
-        compound.putInt("energy", energy.getEnergyStored());
+        itemHandlerCapability.ifPresent(h -> {
+            CompoundNBT compoundItem = ((INBTSerializable<CompoundNBT>) h).serializeNBT();
+            compound.put("inv", compoundItem);
+        });
+        energyCapability.ifPresent(h -> {
+            CompoundNBT compoundEnergy = ((INBTSerializable<CompoundNBT>) h).serializeNBT();
+            compound.put("energy", compoundEnergy);
+        });
+        compound.putInt("counter", counter);
+        compound.putInt("maxburn", maxBurn);
         return super.write(compound);
     }
 
