@@ -55,7 +55,7 @@ public class ChargingGadgets
     }
 
     private void clientSetup(final FMLClientSetupEvent event) {
-        ScreenManager.<ChargingStationContainer, ChargingStationScreen>registerFactory(ModBlocks.CHARGING_STATION_CONTAINER.get(), ChargingStationScreen::new);
+        ScreenManager.registerFactory(ModBlocks.CHARGING_STATION_CONTAINER.get(), ChargingStationScreen::new);
         // need the render
 //        FMLJavaModLoadingContext.get().getModEventBus().addListener(e -> {
 //            ClientRegistry.bindTileEntityRenderer(ChargingStationTile.TYPE, ChargingStationTER::new);

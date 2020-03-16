@@ -32,10 +32,6 @@ public class ChargingStationScreen  extends ContainerScreen<ChargingStationConta
         this.container = container;
     }
 
-    public ChargingStationScreen(ChargingStationTile tileEntity, ChargingStationContainer container, PlayerInventory inv) {
-        super(container, inv, new StringTextComponent("Charging station"));
-    }
-
     @Override
     public void render(int mouseX, int mouseY, float partialTicks) {
         this.renderBackground();

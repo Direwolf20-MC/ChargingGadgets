@@ -2,6 +2,7 @@ package com.direwolf20.charginggadgets.common.blocks;
 
 import com.direwolf20.charginggadgets.ChargingGadgets;
 import com.direwolf20.charginggadgets.common.container.ChargingStationContainer;
+import com.direwolf20.charginggadgets.common.items.ChargingStationItem;
 import com.direwolf20.charginggadgets.common.tiles.ChargingStationTile;
 import net.minecraft.block.Block;
 import net.minecraft.inventory.container.Container;
@@ -37,5 +38,5 @@ public class ModBlocks {
      * items... so... when we add items. Move this!
      */
     public static final DeferredRegister<Item> ITEMS = new DeferredRegister<>(ForgeRegistries.ITEMS, ChargingGadgets.MOD_ID);
-    public static final RegistryObject<Item> CHARGING_STATION_BI = ITEMS.register("charging_station", () -> new BlockItem(CHARGING_STATION.get(), ChargingGadgets.ITEM_PROPS));
+    public static final RegistryObject<Item> CHARGING_STATION_BI = ITEMS.register("charging_station", () -> new ChargingStationItem(CHARGING_STATION.get(), ChargingGadgets.ITEM_PROPS));
 }

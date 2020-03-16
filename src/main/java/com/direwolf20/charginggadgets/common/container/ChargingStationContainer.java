@@ -2,6 +2,7 @@ package com.direwolf20.charginggadgets.common.container;
 
 import com.direwolf20.charginggadgets.ChargingGadgets;
 import com.direwolf20.charginggadgets.common.blocks.ModBlocks;
+import com.direwolf20.charginggadgets.common.capabilities.ChargerEnergyStorage;
 import com.direwolf20.charginggadgets.common.tiles.ChargingStationTile;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -11,6 +12,7 @@ import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.IntReferenceHolder;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -30,6 +32,18 @@ public class ChargingStationContainer extends Container {
         BlockPos pos = extraData.readBlockPos();
         this.tile = (ChargingStationTile) playerInventory.player.world.getTileEntity(pos);
         this.setup(playerInventory);
+
+        trackInt(new IntReferenceHolder() {
+            @Override
+            public int get() {
+                return getEnergy();
+            }
+
+            @Override
+            public void set(int value) {
+                tile.getCapability(CapabilityEnergy.ENERGY).ifPresent(h -> ((ChargerEnergyStorage)h).setEnergy(value));
+            }
+        });
     }
 
     public ChargingStationContainer(int windowId, World world, BlockPos pos, PlayerInventory playerInventory, PlayerEntity player) {

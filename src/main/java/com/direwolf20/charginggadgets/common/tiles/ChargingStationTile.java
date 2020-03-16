@@ -72,7 +72,8 @@ public class ChargingStationTile extends TileEntity implements ITickableTileEnti
     @Nullable
     @Override
     public Container createMenu(int i, PlayerInventory playerInventory, PlayerEntity playerEntity) {
-        return new ChargingStationContainer(i, playerEntity.world, this.pos, playerInventory, playerEntity);
+        assert world != null;
+        return new ChargingStationContainer(i, world, pos, playerInventory, playerEntity);
     }
 
     @Override

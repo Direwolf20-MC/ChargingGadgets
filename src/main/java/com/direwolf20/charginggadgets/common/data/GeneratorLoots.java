@@ -39,6 +39,7 @@ public class GeneratorLoots extends LootTableProvider {
                     .name("charging_gadget")
                     .rolls(ConstantRange.of(1))
                     .addEntry(ItemLootEntry.builder(ModBlocks.CHARGING_STATION.get())
+
                             .acceptFunction(CopyName.builder(CopyName.Source.BLOCK_ENTITY))
                             .acceptFunction(CopyNbt.builder(CopyNbt.Source.BLOCK_ENTITY)
                                     .addOperation("inv", "BlockEntityTag.inv", CopyNbt.Action.REPLACE)
