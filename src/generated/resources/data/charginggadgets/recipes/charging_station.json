@@ -7,16 +7,16 @@
   ],
   "key": {
     "i": {
-      "tag": "forge:ingots/gold"
+      "tag": "forge:ingots/iron"
     },
     "r": {
       "tag": "forge:dusts/redstone"
     },
     "l": {
-      "tag": "forge:gems/lapis"
+      "tag": "forge:storage_blocks/coal"
     },
     "d": {
-      "tag": "forge:gems/diamond"
+      "tag": "forge:gems/lapis"
     }
   },
   "result": {
