@@ -20,10 +20,10 @@ public final class GeneratorRecipes extends RecipeProvider {
         Block block = ModBlocks.CHARGING_STATION.get();
         ShapedRecipeBuilder
                 .shapedRecipe(block)
-                .key('i', Tags.Items.INGOTS_GOLD)
+                .key('i', Tags.Items.INGOTS_IRON)
                 .key('r', Tags.Items.DUSTS_REDSTONE)
-                .key('l', Tags.Items.GEMS_LAPIS)
-                .key('d', Tags.Items.GEMS_DIAMOND)
+                .key('l', Tags.Items.STORAGE_BLOCKS_COAL)
+                .key('d', Tags.Items.GEMS_LAPIS)
                 .patternLine("iri")
                 .patternLine("drd")
                 .patternLine("ili")
