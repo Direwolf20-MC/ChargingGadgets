@@ -8,14 +8,21 @@ import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.tileentity.AbstractFurnaceTileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.SlotItemHandler;
 
+import javax.annotation.Nonnull;
+
 public class ChargingStationContainer extends Container {
+    private static final int SLOTS = 2;
+
     private ChargingStationTile tile;
 
     public ChargingStationContainer(int windowId, PlayerInventory playerInventory, PacketBuffer extraData) {
@@ -35,8 +42,8 @@ public class ChargingStationContainer extends Container {
         this.getTile().getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null).ifPresent(handler -> {
             int y = 43;
 
-            addSlot(new SlotItemHandler(handler, 0, 65, y));
-            addSlot(new SlotItemHandler(handler, 1, 119, y));
+            addSlot(new RestrictedSlot(handler, 0, 65, y));
+            addSlot(new RestrictedSlot(handler, 1, 119, y));
         });
 
         // Slots for the hotbar
@@ -57,8 +64,29 @@ public class ChargingStationContainer extends Container {
 
     @Override
     public ItemStack transferStackInSlot(PlayerEntity playerIn, int index) {
-        System.out.println(index);
-        return ItemStack.EMPTY;
+        ItemStack itemstack = ItemStack.EMPTY;
+        Slot slot = this.inventorySlots.get(index);
+
+        if (slot != null && slot.getHasStack()) {
+            ItemStack currentStack = slot.getStack();
+            itemstack = currentStack.copy();
+
+            if (index < SLOTS) {
+                if (! this.mergeItemStack(currentStack, SLOTS, this.inventorySlots.size(), false)) {
+                    return ItemStack.EMPTY;
+                }
+            } else if (! this.mergeItemStack(currentStack, 0, SLOTS, false)) {
+                return ItemStack.EMPTY;
+            }
+
+            if (currentStack.isEmpty()) {
+                slot.putStack(ItemStack.EMPTY);
+            } else {
+                slot.onSlotChanged();
+            }
+        }
+
+        return itemstack;
     }
 
     @Override
@@ -72,5 +100,22 @@ public class ChargingStationContainer extends Container {
 
     public int getEnergy() {
         return tile.getCapability(CapabilityEnergy.ENERGY).map(IEnergyStorage::getEnergyStored).orElse(0);
+    }
+
+    static class RestrictedSlot extends SlotItemHandler {
+        public RestrictedSlot(IItemHandler itemHandler, int index, int xPosition, int yPosition) {
+            super(itemHandler, index, xPosition, yPosition);
+        }
+
+        @Override
+        public boolean isItemValid(@Nonnull ItemStack stack) {
+            if( getSlotIndex() == ChargingStationTile.Slots.CHARGE.getId() )
+                return stack.getCapability(CapabilityEnergy.ENERGY).isPresent();
+
+            if( getSlotIndex() == ChargingStationTile.Slots.FUEL.getId() )
+                return ForgeHooks.getBurnTime(stack) != 0;
+
+            return super.isItemValid(stack);
+        }
     }
 }
