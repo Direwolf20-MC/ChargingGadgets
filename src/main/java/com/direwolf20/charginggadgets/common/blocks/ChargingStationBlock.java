@@ -1,19 +1,15 @@
 package com.direwolf20.charginggadgets.common.blocks;
 
 import com.direwolf20.charginggadgets.common.capabilities.ItemHandlerWrapper;
-import com.direwolf20.charginggadgets.common.items.ChargingStationItem;
 import com.direwolf20.charginggadgets.common.tiles.ChargingStationTile;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.ChestBlock;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.item.ItemStack;
 import net.minecraft.state.DirectionProperty;
 import net.minecraft.state.StateContainer;
 import net.minecraft.state.properties.BlockStateProperties;
@@ -25,19 +21,14 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
-import net.minecraft.world.storage.loot.LootContext;
-import net.minecraft.world.storage.loot.LootParameters;
 import net.minecraftforge.common.ToolType;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.fml.network.NetworkHooks;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
-import net.minecraftforge.items.wrapper.InvWrapper;
 
 import javax.annotation.Nullable;
-import java.util.List;
 
 public class ChargingStationBlock extends Block {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
@@ -60,22 +51,23 @@ public class ChargingStationBlock extends Block {
         return getDefaultState().with(FACING, context.getPlacementHorizontalFacing().getOpposite());
     }
 
-    @Override
-    @SuppressWarnings("deprecation")
-    public List<ItemStack> getDrops(BlockState state, LootContext.Builder builder) {
-        TileEntity te = builder.get(LootParameters.BLOCK_ENTITY);
-
-        List<ItemStack> drops = super.getDrops(state, builder);
-        if (te instanceof ChargingStationTile) {
-            ChargingStationTile tileEntity = (ChargingStationTile) te;
-            drops.stream()
-                    .filter(e -> e.getItem() instanceof ChargingStationItem)
-                    .findFirst()
-                    .ifPresent(e -> this.setupItem(tileEntity, e));
-        }
-
-        return drops;
-    }
+// todo: re-implement when energy persistence is added.
+//    @Override
+//    @SuppressWarnings("deprecation")
+//    public List<ItemStack> getDrops(BlockState state, LootContext.Builder builder) {
+//        TileEntity te = builder.get(LootParameters.BLOCK_ENTITY);
+//
+//        List<ItemStack> drops = super.getDrops(state, builder);
+//        if (te instanceof ChargingStationTile) {
+//            ChargingStationTile tileEntity = (ChargingStationTile) te;
+//            drops.stream()
+//                    .filter(e -> e.getItem() instanceof ChargingStationItem)
+//                    .findFirst()
+//                    .ifPresent(e -> this.setupItem(tileEntity, e));
+//        }
+//
+//        return drops;
+//    }
 
     @Override
     @SuppressWarnings("deprecation")
@@ -93,9 +85,9 @@ public class ChargingStationBlock extends Block {
         }
     }
 
-    public void setupItem(ChargingStationTile tile, ItemStack item) {
-        tile.getEnergy().ifPresent(e -> item.getCapability(CapabilityEnergy.ENERGY).ifPresent(a -> a.receiveEnergy(e.getMaxEnergyStored(), false)));
-    }
+//    public void setupItem(ChargingStationTile tile, ItemStack item) {
+//        tile.getEnergy().ifPresent(e -> item.getCapability(CapabilityEnergy.ENERGY).ifPresent(a -> a.receiveEnergy(e.getMaxEnergyStored(), false)));
+//    }
 
     @Override
     @SuppressWarnings("deprecation")

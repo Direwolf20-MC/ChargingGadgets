@@ -39,10 +39,10 @@ public class ChargingStationScreen  extends ContainerScreen<ChargingStationConta
 
         if (mouseX > (guiLeft + 7) && mouseX < (guiLeft + 7) + 18 && mouseY > (guiTop + 7) && mouseY < (guiTop + 7) + 73)
             this.renderTooltip(Arrays.asList(
-                    String.format("Energy: %s FE", withSuffix(this.container.getEnergy())),
+                    I18n.format("screen.charginggadgets.energy", withSuffix(this.container.getEnergy())),
                     this.container.getTile().getRemainingBurn() <= 0 ?
-                            "No fuel" :
-                            String.format("Burn time left: %ss", ticksInSeconds(this.container.getTile().getRemainingBurn()))
+                            I18n.format("screen.charginggadgets.no_fuel") :
+                            I18n.format("screen.charginggadgets.burn_time", ticksInSeconds(this.container.getTile().getRemainingBurn()))
             ), mouseX, mouseY);
 
         toolTip.clear();
@@ -77,7 +77,7 @@ public class ChargingStationScreen  extends ContainerScreen<ChargingStationConta
     @Override
     protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
         Minecraft.getInstance().fontRenderer.drawString(
-                I18n.format("block.buildinggadgets.charging_station"),
+                I18n.format("block.charginggadgets.charging_station"),
                 55,
                 8,
                 Color.DARK_GRAY.getRGB()

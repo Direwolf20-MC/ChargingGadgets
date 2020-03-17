@@ -32,18 +32,18 @@ public class GeneratorLoots extends LootTableProvider {
         return ImmutableList.of(Pair.of(Blocks::new, LootParameterSets.BLOCK));
     }
 
-    private class Blocks extends BlockLootTables {
+    private static class Blocks extends BlockLootTables {
         @Override
         protected void addTables() {
             LootPool.Builder builder = LootPool.builder()
                     .name("charging_gadget")
                     .rolls(ConstantRange.of(1))
                     .addEntry(ItemLootEntry.builder(ModBlocks.CHARGING_STATION.get())
-
-                            .acceptFunction(CopyName.builder(CopyName.Source.BLOCK_ENTITY))
-                            .acceptFunction(CopyNbt.builder(CopyNbt.Source.BLOCK_ENTITY)
-                                    .addOperation("inv", "BlockEntityTag.inv", CopyNbt.Action.REPLACE)
-                                    .addOperation("energy", "BlockEntityTag.energy", CopyNbt.Action.REPLACE))
+// todo: figure out why these don't work
+//                            .acceptFunction(CopyName.builder(CopyName.Source.BLOCK_ENTITY))
+//                            .acceptFunction(CopyNbt.builder(CopyNbt.Source.BLOCK_ENTITY)
+//                                    .addOperation("inv", "BlockEntityTag.inv", CopyNbt.Action.REPLACE)
+//                                    .addOperation("energy", "BlockEntityTag.energy", CopyNbt.Action.REPLACE))
                             .acceptFunction(SetContents.func_215920_b()
                                     .func_216075_a(DynamicLootEntry.func_216162_a(new ResourceLocation("minecraft", "contents"))))
                     );

@@ -13,5 +13,9 @@ public class GeneratorLanguage extends LanguageProvider {
     @Override
     protected void addTranslations() {
         addBlock(ModBlocks.CHARGING_STATION, "Charging Station");
+        add("itemGroup.charginggadgets", "Charging Gadgets");
+        add("screen.charginggadgets.energy", "Energy: %s FE");
+        add("screen.charginggadgets.no_fuel", "Fuel source empty");
+        add("screen.charginggadgets.burn_time", "Burn time left: %ss");
     }
 }

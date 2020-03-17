@@ -1,5 +1,6 @@
 package com.direwolf20.charginggadgets.common.tiles;
 
+import com.direwolf20.charginggadgets.common.Config;
 import com.direwolf20.charginggadgets.common.blocks.ModBlocks;
 import com.direwolf20.charginggadgets.common.capabilities.ChargerEnergyStorage;
 import com.direwolf20.charginggadgets.common.capabilities.ChargerItemHandler;
@@ -19,10 +20,8 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.energy.CapabilityEnergy;
-import net.minecraftforge.energy.EnergyStorage;
 import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
@@ -47,7 +46,7 @@ public class ChargingStationTile extends TileEntity implements ITickableTileEnti
         }
     }
 
-    private LazyOptional<ChargerEnergyStorage> energy = LazyOptional.of(() -> new ChargerEnergyStorage(1000000));
+    private LazyOptional<ChargerEnergyStorage> energy = LazyOptional.of(() -> new ChargerEnergyStorage(Config.GENERAL.chargerMaxPower.get()));
     private LazyOptional<ItemStackHandler> inventory  = LazyOptional.of(() -> new ChargerItemHandler(this));
 
     private int counter = 0;
@@ -76,7 +75,6 @@ public class ChargingStationTile extends TileEntity implements ITickableTileEnti
             if (!stack.isEmpty())
                 chargeItem(stack);
         });
-//        getEnergy().resetReceiveCap();
     }
 
     private void chargeItem(ItemStack stack) {
@@ -205,9 +203,5 @@ public class ChargingStationTile extends TileEntity implements ITickableTileEnti
 
     public int getMaxBurn() {
         return maxBurn;
-    }
-
-    public LazyOptional<ChargerEnergyStorage> getEnergy() {
-        return energy;
     }
 }
