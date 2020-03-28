@@ -66,10 +66,10 @@ public class ChargingStationScreen  extends ContainerScreen<ChargingStationConta
         }
 
         this.container.getTile().getCapability(CapabilityEnergy.ENERGY).ifPresent(energy -> {
-            int height = 68;
+            int height = 70;
             if (energy.getMaxEnergyStored() > 0) {
                 int remaining = (energy.getEnergyStored() * height) / energy.getMaxEnergyStored();
-                this.blit(guiLeft + 8, guiTop + 76 - remaining, 176, 83 - remaining, 16, remaining + 1);
+                this.blit(guiLeft + 8, guiTop + 78 - remaining, 176, 84 - remaining, 16, remaining + 1);
             }
         });
     }
