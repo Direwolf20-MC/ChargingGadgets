@@ -41,6 +41,8 @@ public class ChargingStationContainer extends Container {
         this.data = chargingStationData;
         this.handler = handler;
 
+        trackIntArray(this.data);
+
         System.out.println(this.data.get(0));
 
         this.setup(playerInventory);
