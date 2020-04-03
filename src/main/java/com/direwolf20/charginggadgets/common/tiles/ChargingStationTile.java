@@ -13,15 +13,18 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SUpdateTileEntityPacket;
+import net.minecraft.tileentity.AbstractFurnaceTileEntity;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
+import net.minecraft.util.IIntArray;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.energy.CapabilityEnergy;
+import net.minecraftforge.energy.EnergyStorage;
 import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
@@ -46,21 +49,44 @@ public class ChargingStationTile extends TileEntity implements ITickableTileEnti
         }
     }
 
-    private LazyOptional<ChargerEnergyStorage> energy = LazyOptional.of(() -> new ChargerEnergyStorage(Config.GENERAL.chargerMaxPower.get()));
+    private LazyOptional<ChargerEnergyStorage> energy = LazyOptional.of(() -> new ChargerEnergyStorage(this, 0, Config.GENERAL.chargerMaxPower.get()));
     private LazyOptional<ItemStackHandler> inventory  = LazyOptional.of(() -> new ChargerItemHandler(this));
+    public final IIntArray chargingStationData = new IIntArray() {
+        @Override
+        public int get(int index) {
+            if( index == 0 )
+                return ChargingStationTile.this.energy.map(ChargerEnergyStorage::getEnergyStored).orElse(0);
+            if( index == 1 )
+                return ChargingStationTile.this.energy.map(ChargerEnergyStorage::getMaxEnergyStored).orElse(0);
+            return 0;
+        }
+
+        @Override
+        public void set(int index, int value) {
+            if( index == 0 )
+                ChargingStationTile.this.getEnergyStorage().receiveEnergy(value, false);
+        }
+
+        @Override
+        public int size() {
+            return 2;
+        }
+    };
 
     private int counter = 0;
-    private int maxBurn = 0;
 
+    private int maxBurn = 0;
     public ChargingStationTile() {
         super(ModBlocks.CHARGING_STATION_TILE.get());
     }
+
+
 
     @Nullable
     @Override
     public Container createMenu(int i, PlayerInventory playerInventory, PlayerEntity playerEntity) {
         assert world != null;
-        return new ChargingStationContainer(this, i, playerInventory);
+        return new ChargingStationContainer(this.chargingStationData, i, playerInventory, this.inventory.orElse(new ItemStackHandler(2)));
     }
 
     @Override
@@ -78,12 +104,12 @@ public class ChargingStationTile extends TileEntity implements ITickableTileEnti
     }
 
     private void chargeItem(ItemStack stack) {
-        energy.ifPresent(energyStorage -> stack.getCapability(CapabilityEnergy.ENERGY).ifPresent(itemEnergy -> {
+        this.getCapability(CapabilityEnergy.ENERGY).ifPresent(energyStorage -> stack.getCapability(CapabilityEnergy.ENERGY).ifPresent(itemEnergy -> {
             if (!isChargingItem(itemEnergy))
                 return;
 
             int energyRemoved = itemEnergy.receiveEnergy(Math.min(energyStorage.getEnergyStored(), 2500), false);
-            energyStorage.internalExtractEnergy(energyRemoved, false);
+            ((ChargerEnergyStorage) energyStorage).consumeEnergy(energyRemoved, false);
         }));
     }
 
@@ -95,7 +121,8 @@ public class ChargingStationTile extends TileEntity implements ITickableTileEnti
         if( world == null )
             return;
 
-        energy.ifPresent(energyStorage -> {
+
+        this.getCapability(CapabilityEnergy.ENERGY).ifPresent(energyStorage -> {
             boolean canInsertEnergy = energyStorage.receiveEnergy(2500, true) > 0;
             if (counter > 0 && canInsertEnergy) {
                 burn(energyStorage);
@@ -162,6 +189,16 @@ public class ChargingStationTile extends TileEntity implements ITickableTileEnti
             return energy.cast();
 
         return super.getCapability(cap, side);
+    }
+
+    public IEnergyStorage getEnergyStorage() {
+        return this.getCapability(CapabilityEnergy.ENERGY).orElse(new EnergyStorage(0));
+    }
+
+    public void markDirtyQuick() {
+        if (getWorld() != null) {
+            getWorld().markChunkDirty(this.pos, this);
+        }
     }
 
     @Override

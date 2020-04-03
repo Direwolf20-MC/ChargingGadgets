@@ -9,6 +9,8 @@ import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.AbstractFurnaceTileEntity;
+import net.minecraft.util.IIntArray;
+import net.minecraft.util.IntArray;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.common.ForgeHooks;
@@ -16,6 +18,7 @@ import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.items.ItemStackHandler;
 import net.minecraftforge.items.SlotItemHandler;
 
 import javax.annotation.Nonnull;
@@ -23,28 +26,29 @@ import javax.annotation.Nonnull;
 public class ChargingStationContainer extends Container {
     private static final int SLOTS = 2;
 
-    private ChargingStationTile tile;
+    public IIntArray data;
+    public ItemStackHandler handler;
+//    private ChargingStationTile tile;
 
     public ChargingStationContainer(int windowId, PlayerInventory playerInventory, PacketBuffer extraData) {
-        super(ModBlocks.CHARGING_STATION_CONTAINER.get(), windowId);
-        BlockPos pos = extraData.readBlockPos();
-        this.tile = (ChargingStationTile) playerInventory.player.world.getTileEntity(pos);
-        this.setup(playerInventory);
+        this(new IntArray(2), windowId, playerInventory, new ItemStackHandler(2));
     }
 
-    public ChargingStationContainer(ChargingStationTile tile, int windowId, PlayerInventory playerInventory) {
+    public ChargingStationContainer(IIntArray chargingStationData, int windowId, PlayerInventory playerInventory, ItemStackHandler handler) {
         super(ModBlocks.CHARGING_STATION_CONTAINER.get(), windowId);
-        this.tile = tile;
+
+        System.out.println("Me");
+        this.data = chargingStationData;
+        this.handler = handler;
+
+        System.out.println(this.data.get(0));
+
         this.setup(playerInventory);
     }
 
     public void setup(PlayerInventory inventory) {
-        this.getTile().getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null).ifPresent(handler -> {
-            int y = 43;
-
-            addSlot(new RestrictedSlot(handler, 0, 65, y));
-            addSlot(new RestrictedSlot(handler, 1, 119, y));
-        });
+        addSlot(new RestrictedSlot(handler, 0, 65, 43));
+        addSlot(new RestrictedSlot(handler, 1, 119, 43));
 
         // Slots for the hotbar
         for (int row = 0; row < 9; ++ row) {
@@ -91,15 +95,8 @@ public class ChargingStationContainer extends Container {
 
     @Override
     public boolean canInteractWith(PlayerEntity playerIn) {
-        return !getTile().isRemoved() && playerIn.getDistanceSq(new Vec3d(getTile().getPos()).add(0.5D, 0.5D, 0.5D)) <= 64D;
-    }
-
-    public ChargingStationTile getTile() {
-        return tile;
-    }
-
-    public int getEnergy() {
-        return tile.getCapability(CapabilityEnergy.ENERGY).map(IEnergyStorage::getEnergyStored).orElse(0);
+//        return !getTile().isRemoved() && playerIn.getDistanceSq(new Vec3d(getTile().getPos()).add(0.5D, 0.5D, 0.5D)) <= 64D;
+        return true;
     }
 
     static class RestrictedSlot extends SlotItemHandler {

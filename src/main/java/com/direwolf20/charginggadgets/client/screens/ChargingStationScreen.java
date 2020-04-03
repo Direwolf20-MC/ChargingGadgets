@@ -1,12 +1,15 @@
 package com.direwolf20.charginggadgets.client.screens;
 
 import com.direwolf20.charginggadgets.common.ChargingGadgets;
+import com.direwolf20.charginggadgets.common.capabilities.ChargerEnergyStorage;
 import com.direwolf20.charginggadgets.common.container.ChargingStationContainer;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
+import net.minecraft.client.gui.screen.inventory.FurnaceScreen;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.container.FurnaceContainer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.energy.CapabilityEnergy;
@@ -22,12 +25,10 @@ public class ChargingStationScreen  extends ContainerScreen<ChargingStationConta
 
     private static final ResourceLocation background = new ResourceLocation(ChargingGadgets.MOD_ID, "textures/gui/charging_station.png");
 
-    private ChargingStationContainer container;
     private List<String> toolTip = new ArrayList<>();
 
     public ChargingStationScreen(ChargingStationContainer container, PlayerInventory playerInventory, ITextComponent title) {
         super(container, playerInventory, title);
-        this.container = container;
     }
 
     @Override
@@ -39,10 +40,10 @@ public class ChargingStationScreen  extends ContainerScreen<ChargingStationConta
 
         if (mouseX > (guiLeft + 7) && mouseX < (guiLeft + 7) + 18 && mouseY > (guiTop + 7) && mouseY < (guiTop + 7) + 73)
             this.renderTooltip(Arrays.asList(
-                    I18n.format("screen.charginggadgets.energy", withSuffix(this.container.getEnergy())),
-                    this.container.getTile().getRemainingBurn() <= 0 ?
-                            I18n.format("screen.charginggadgets.no_fuel") :
-                            I18n.format("screen.charginggadgets.burn_time", ticksInSeconds(this.container.getTile().getRemainingBurn()))
+                    I18n.format("screen.charginggadgets.energy", withSuffix(this.container.data.get(0)))
+//                    this.container.getTile().getRemainingBurn() <= 0 ?
+//                            I18n.format("screen.charginggadgets.no_fuel") :
+//                            I18n.format("screen.charginggadgets.burn_time", ticksInSeconds(this.container.getTile().getRemainingBurn()))
             ), mouseX, mouseY);
 
         toolTip.clear();
@@ -59,19 +60,20 @@ public class ChargingStationScreen  extends ContainerScreen<ChargingStationConta
         getMinecraft().getTextureManager().bindTexture(background);
         blit(guiLeft, guiTop, 0, 0, xSize, ySize);
 
-        int maxHeight = 13;
-        if (this.container.getTile().getMaxBurn() > 0) {
-            int remaining = (this.container.getTile().getRemainingBurn() * maxHeight) / this.container.getTile().getMaxBurn();
-            this.blit(guiLeft + 66, guiTop + 26 + 13 - remaining, 176, 13 - remaining, 14, remaining + 1);
-        }
+//        int maxHeight = 13;
+//        if (this.container.getTile().getMaxBurn() > 0) {
+//            int remaining = (this.container.getTile().getRemainingBurn() * maxHeight) / this.container.getTile().getMaxBurn();
+//            this.blit(guiLeft + 66, guiTop + 26 + 13 - remaining, 176, 13 - remaining, 14, remaining + 1);
+//        }
 
-        this.container.getTile().getCapability(CapabilityEnergy.ENERGY).ifPresent(energy -> {
-            int height = 70;
-            if (energy.getMaxEnergyStored() > 0) {
-                int remaining = (energy.getEnergyStored() * height) / energy.getMaxEnergyStored();
-                this.blit(guiLeft + 8, guiTop + 78 - remaining, 176, 84 - remaining, 16, remaining + 1);
-            }
-        });
+        int energy = this.container.data.get(0);
+        int maxEnergy = this.container.data.get(1);
+
+        int height = 70;
+        if (maxEnergy > 0) {
+            int remaining = (energy * height) / maxEnergy;
+            this.blit(guiLeft + 8, guiTop + 78 - remaining, 176, 84 - remaining, 16, remaining + 1);
+        }
     }
 
     @Override
