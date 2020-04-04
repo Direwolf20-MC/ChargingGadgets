@@ -64,9 +64,9 @@ public class ChargingStationTile extends TileEntity implements ITickableTileEnti
         public int get(int index) {
             switch (index) {
                 case 0:
-                    return ChargingStationTile.this.energyStorage.getEnergyStored();
+                    return ChargingStationTile.this.energyStorage.getEnergyStored() / 32;
                 case 1:
-                    return ChargingStationTile.this.energyStorage.getMaxEnergyStored();
+                    return ChargingStationTile.this.energyStorage.getMaxEnergyStored() / 32;
                 case 2:
                     return ChargingStationTile.this.counter;
                 case 3:

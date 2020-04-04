@@ -37,6 +37,7 @@ public class ChargingStationScreen  extends ContainerScreen<ChargingStationConta
     public void render(int mouseX, int mouseY, float partialTicks) {
         this.renderBackground();
         super.render(mouseX, mouseY, partialTicks);
+        // 1 million mod 2^16 (16 bits in a short) is 16960.
 
         this.renderHoveredToolTip(mouseX, mouseY);
         if (mouseX > (guiLeft + 7) && mouseX < (guiLeft + 7) + 18 && mouseY > (guiTop + 7) && mouseY < (guiTop + 7) + 73)
