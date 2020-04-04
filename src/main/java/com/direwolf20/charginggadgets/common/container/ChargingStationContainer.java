@@ -27,7 +27,7 @@ import javax.annotation.Nullable;
 public class ChargingStationContainer extends Container {
     private static final int SLOTS = 2;
 
-    public IIntArray data;
+    public final IIntArray data;
     public ItemStackHandler handler;
 
     // Tile can be null and shouldn't be used for accessing any data that needs to be up to date on both sidess
@@ -40,12 +40,13 @@ public class ChargingStationContainer extends Container {
     public ChargingStationContainer(@Nullable ChargingStationTile tile, IIntArray chargingStationData, int windowId, PlayerInventory playerInventory, ItemStackHandler handler) {
         super(ModBlocks.CHARGING_STATION_CONTAINER.get(), windowId);
 
-        this.data = chargingStationData;
         this.handler = handler;
         this.tile = tile;
 
-        trackIntArray(this.data);
+        this.data = chargingStationData;
         this.setup(playerInventory);
+
+        trackIntArray(chargingStationData);
     }
 
     public void setup(PlayerInventory inventory) {
@@ -98,6 +99,22 @@ public class ChargingStationContainer extends Container {
     @Override
     public boolean canInteractWith(PlayerEntity playerIn) {
         return this.tile != null && !this.tile.isRemoved() && playerIn.getDistanceSq(new Vec3d(this.tile.getPos()).add(0.5D, 0.5D, 0.5D)) <= 64D;
+    }
+
+    public int getMaxPower() {
+        return this.data.get(1);
+    }
+
+    public int getEnergy() {
+        return this.data.get(0);
+    }
+
+    public int getMaxBurn() {
+        return this.data.get(3);
+    }
+
+    public int getRemaining() {
+        return this.data.get(2);
     }
 
     static class RestrictedSlot extends SlotItemHandler {

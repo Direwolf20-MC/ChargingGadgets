@@ -62,23 +62,23 @@ public class ChargingStationTile extends TileEntity implements ITickableTileEnti
     public final IIntArray chargingStationData = new IIntArray() {
         @Override
         public int get(int index) {
-            if( index == 0 )
-                return ChargingStationTile.this.energy.map(ChargerEnergyStorage::getEnergyStored).orElse(0);
-            if( index == 1 )
-                return ChargingStationTile.this.energy.map(ChargerEnergyStorage::getMaxEnergyStored).orElse(0);
-            if( index == 2 )
-                return ChargingStationTile.this.counter;
-            if( index == 3 )
-                return ChargingStationTile.this.maxBurn;
-
-            return 0;
+            switch (index) {
+                case 0:
+                    return ChargingStationTile.this.energyStorage.getEnergyStored();
+                case 1:
+                    return ChargingStationTile.this.energyStorage.getMaxEnergyStored();
+                case 2:
+                    return ChargingStationTile.this.counter;
+                case 3:
+                    return ChargingStationTile.this.maxBurn;
+                default:
+                    throw new IllegalArgumentException("Invalid index: " + index);
+            }
         }
 
-        // Not actually sure if we should be setting anything?
         @Override
         public void set(int index, int value) {
-            if( index == 0 )
-                ChargingStationTile.this.getEnergyStorage().receiveEnergy(value, false);
+            throw new IllegalStateException("Cannot set values through IIntArray");
         }
 
         @Override
