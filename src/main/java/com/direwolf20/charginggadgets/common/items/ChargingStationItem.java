@@ -1,5 +1,6 @@
 package com.direwolf20.charginggadgets.common.items;
 
+import com.direwolf20.charginggadgets.common.Config;
 import com.direwolf20.charginggadgets.common.tiles.ChargingStationTile;
 import com.direwolf20.charginggadgets.common.utils.MagicHelpers;
 import net.minecraft.block.Block;
@@ -34,7 +35,7 @@ public class ChargingStationItem extends BlockItem {
         if( power == 0 )
             return;
 
-        tooltip.add(new TranslationTextComponent("screen.charginggadgets.energy", MagicHelpers.withSuffix(power)).applyTextStyle(TextFormatting.GREEN));
+        tooltip.add(new TranslationTextComponent("screen.charginggadgets.energy", MagicHelpers.withSuffix(power), MagicHelpers.withSuffix(Config.GENERAL.chargerMaxPower.get())).applyTextStyle(TextFormatting.GREEN));
     }
 
     @Override

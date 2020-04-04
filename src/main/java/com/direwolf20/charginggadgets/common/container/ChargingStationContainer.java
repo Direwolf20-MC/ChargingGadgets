@@ -30,7 +30,7 @@ public class ChargingStationContainer extends Container {
     public final IIntArray data;
     public ItemStackHandler handler;
 
-    // Tile can be null and shouldn't be used for accessing any data that needs to be up to date on both sidess
+    // Tile can be null and shouldn't be used for accessing any data that needs to be up to date on both sides
     private ChargingStationTile tile;
 
     public ChargingStationContainer(int windowId, PlayerInventory playerInventory, PacketBuffer extraData) {

@@ -205,10 +205,6 @@ public class ChargingStationTile extends TileEntity implements ITickableTileEnti
         return super.getCapability(cap, side);
     }
 
-    public IEnergyStorage getEnergyStorage() {
-        return this.getCapability(CapabilityEnergy.ENERGY).orElse(new EnergyStorage(0));
-    }
-
     @Override
     public SUpdateTileEntityPacket getUpdatePacket() {
         // Vanilla uses the type parameter to indicate which type of tile entity (command block, skull, or beacon?) is receiving the packet, but it seems like Forge has overridden this behavior

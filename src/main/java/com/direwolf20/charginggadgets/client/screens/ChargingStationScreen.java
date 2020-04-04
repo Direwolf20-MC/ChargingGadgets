@@ -37,12 +37,11 @@ public class ChargingStationScreen  extends ContainerScreen<ChargingStationConta
     public void render(int mouseX, int mouseY, float partialTicks) {
         this.renderBackground();
         super.render(mouseX, mouseY, partialTicks);
-        // 1 million mod 2^16 (16 bits in a short) is 16960.
 
         this.renderHoveredToolTip(mouseX, mouseY);
         if (mouseX > (guiLeft + 7) && mouseX < (guiLeft + 7) + 18 && mouseY > (guiTop + 7) && mouseY < (guiTop + 7) + 73)
             this.renderTooltip(Arrays.asList(
-                    I18n.format("screen.charginggadgets.energy", MagicHelpers.withSuffix(this.container.getEnergy())),
+                    I18n.format("screen.charginggadgets.energy", MagicHelpers.withSuffix(this.container.getEnergy()), MagicHelpers.withSuffix(this.container.getMaxPower())),
                     this.container.getRemaining() <= 0 ?
                             I18n.format("screen.charginggadgets.no_fuel") :
                             I18n.format("screen.charginggadgets.burn_time", MagicHelpers.ticksInSeconds(this.container.getRemaining()))
