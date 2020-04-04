@@ -26,6 +26,7 @@ import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.EnergyStorage;
 import net.minecraftforge.energy.IEnergyStorage;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
@@ -49,8 +50,13 @@ public class ChargingStationTile extends TileEntity implements ITickableTileEnti
         }
     }
 
+    private int counter = 0;
+    private int maxBurn = 0;
+
     private LazyOptional<ChargerEnergyStorage> energy = LazyOptional.of(() -> new ChargerEnergyStorage(this, 0, Config.GENERAL.chargerMaxPower.get()));
     private LazyOptional<ItemStackHandler> inventory  = LazyOptional.of(() -> new ChargerItemHandler(this));
+
+    // Handles tracking changes, kinda messy but apparently this is how the cool kids do it these days
     public final IIntArray chargingStationData = new IIntArray() {
         @Override
         public int get(int index) {
@@ -58,9 +64,15 @@ public class ChargingStationTile extends TileEntity implements ITickableTileEnti
                 return ChargingStationTile.this.energy.map(ChargerEnergyStorage::getEnergyStored).orElse(0);
             if( index == 1 )
                 return ChargingStationTile.this.energy.map(ChargerEnergyStorage::getMaxEnergyStored).orElse(0);
+            if( index == 2 )
+                return ChargingStationTile.this.counter;
+            if( index == 3 )
+                return ChargingStationTile.this.maxBurn;
+
             return 0;
         }
 
+        // Not actually sure if we should be setting anything?
         @Override
         public void set(int index, int value) {
             if( index == 0 )
@@ -69,24 +81,19 @@ public class ChargingStationTile extends TileEntity implements ITickableTileEnti
 
         @Override
         public int size() {
-            return 2;
+            return 4;
         }
     };
 
-    private int counter = 0;
-
-    private int maxBurn = 0;
     public ChargingStationTile() {
         super(ModBlocks.CHARGING_STATION_TILE.get());
     }
-
-
 
     @Nullable
     @Override
     public Container createMenu(int i, PlayerInventory playerInventory, PlayerEntity playerEntity) {
         assert world != null;
-        return new ChargingStationContainer(this.chargingStationData, i, playerInventory, this.inventory.orElse(new ItemStackHandler(2)));
+        return new ChargingStationContainer(this, this.chargingStationData, i, playerInventory, this.inventory.orElse(new ItemStackHandler(2)));
     }
 
     @Override
@@ -195,12 +202,6 @@ public class ChargingStationTile extends TileEntity implements ITickableTileEnti
         return this.getCapability(CapabilityEnergy.ENERGY).orElse(new EnergyStorage(0));
     }
 
-    public void markDirtyQuick() {
-        if (getWorld() != null) {
-            getWorld().markChunkDirty(this.pos, this);
-        }
-    }
-
     @Override
     public SUpdateTileEntityPacket getUpdatePacket() {
         // Vanilla uses the type parameter to indicate which type of tile entity (command block, skull, or beacon?) is receiving the packet, but it seems like Forge has overridden this behavior
@@ -232,13 +233,5 @@ public class ChargingStationTile extends TileEntity implements ITickableTileEnti
     @Override
     public ITextComponent getDisplayName() {
         return new StringTextComponent("Charging Station Tile");
-    }
-
-    public int getRemainingBurn() {
-        return counter;
-    }
-
-    public int getMaxBurn() {
-        return maxBurn;
     }
 }

@@ -22,29 +22,29 @@ import net.minecraftforge.items.ItemStackHandler;
 import net.minecraftforge.items.SlotItemHandler;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class ChargingStationContainer extends Container {
     private static final int SLOTS = 2;
 
     public IIntArray data;
     public ItemStackHandler handler;
-//    private ChargingStationTile tile;
+
+    // Tile can be null and shouldn't be used for accessing any data that needs to be up to date on both sidess
+    private ChargingStationTile tile;
 
     public ChargingStationContainer(int windowId, PlayerInventory playerInventory, PacketBuffer extraData) {
-        this(new IntArray(2), windowId, playerInventory, new ItemStackHandler(2));
+        this((ChargingStationTile) playerInventory.player.world.getTileEntity(extraData.readBlockPos()), new IntArray(4), windowId, playerInventory, new ItemStackHandler(2));
     }
 
-    public ChargingStationContainer(IIntArray chargingStationData, int windowId, PlayerInventory playerInventory, ItemStackHandler handler) {
+    public ChargingStationContainer(@Nullable ChargingStationTile tile, IIntArray chargingStationData, int windowId, PlayerInventory playerInventory, ItemStackHandler handler) {
         super(ModBlocks.CHARGING_STATION_CONTAINER.get(), windowId);
 
-        System.out.println("Me");
         this.data = chargingStationData;
         this.handler = handler;
+        this.tile = tile;
 
         trackIntArray(this.data);
-
-        System.out.println(this.data.get(0));
-
         this.setup(playerInventory);
     }
 
@@ -97,8 +97,7 @@ public class ChargingStationContainer extends Container {
 
     @Override
     public boolean canInteractWith(PlayerEntity playerIn) {
-//        return !getTile().isRemoved() && playerIn.getDistanceSq(new Vec3d(getTile().getPos()).add(0.5D, 0.5D, 0.5D)) <= 64D;
-        return true;
+        return this.tile != null && !this.tile.isRemoved() && playerIn.getDistanceSq(new Vec3d(this.tile.getPos()).add(0.5D, 0.5D, 0.5D)) <= 64D;
     }
 
     static class RestrictedSlot extends SlotItemHandler {
