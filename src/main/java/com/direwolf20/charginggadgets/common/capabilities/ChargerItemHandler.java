@@ -2,6 +2,7 @@ package com.direwolf20.charginggadgets.common.capabilities;
 
 import com.direwolf20.charginggadgets.common.tiles.ChargingStationTile;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.util.NonNullList;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.energy.CapabilityEnergy;
@@ -25,6 +26,9 @@ public class ChargerItemHandler extends ItemStackHandler {
     @Nonnull
     @Override
     public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
+        if (slot == ChargingStationTile.Slots.FUEL.getId() && stack.getItem() == Items.BUCKET)
+            return super.insertItem(slot, stack, simulate);
+
         if (slot == ChargingStationTile.Slots.FUEL.getId() && ForgeHooks.getBurnTime(stack) <= 0)
             return stack;
 

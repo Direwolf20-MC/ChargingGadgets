@@ -9,7 +9,10 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.INamedContainerProvider;
+import net.minecraft.item.BucketItem;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SUpdateTileEntityPacket;
@@ -129,7 +132,6 @@ public class ChargingStationTile extends TileEntity implements ITickableTileEnti
         if( world == null )
             return;
 
-
         this.getCapability(CapabilityEnergy.ENERGY).ifPresent(energyStorage -> {
             boolean canInsertEnergy = energyStorage.receiveEnergy(2500, true) > 0;
             if (counter > 0 && canInsertEnergy) {
@@ -158,7 +160,11 @@ public class ChargingStationTile extends TileEntity implements ITickableTileEnti
 
         int burnTime = ForgeHooks.getBurnTime(stack);
         if (burnTime > 0) {
+            Item fuelStack = handler.getStackInSlot(Slots.FUEL.id).getItem();
             handler.extractItem(0, 1, false);
+            if( fuelStack instanceof BucketItem && fuelStack != Items.BUCKET )
+                handler.insertItem(0, new ItemStack(Items.BUCKET, 1), false);
+
             markDirty();
             counter = (int) Math.floor(burnTime) / 50;
             maxBurn = counter;
