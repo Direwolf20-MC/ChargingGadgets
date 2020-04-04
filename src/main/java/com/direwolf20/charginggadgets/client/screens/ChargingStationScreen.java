@@ -3,6 +3,7 @@ package com.direwolf20.charginggadgets.client.screens;
 import com.direwolf20.charginggadgets.common.ChargingGadgets;
 import com.direwolf20.charginggadgets.common.capabilities.ChargerEnergyStorage;
 import com.direwolf20.charginggadgets.common.container.ChargingStationContainer;
+import com.direwolf20.charginggadgets.common.utils.MagicHelpers;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
@@ -37,10 +38,10 @@ public class ChargingStationScreen  extends ContainerScreen<ChargingStationConta
 
         if (mouseX > (guiLeft + 7) && mouseX < (guiLeft + 7) + 18 && mouseY > (guiTop + 7) && mouseY < (guiTop + 7) + 73)
             this.renderTooltip(Arrays.asList(
-                    I18n.format("screen.charginggadgets.energy", withSuffix(this.container.data.get(0))),
+                    I18n.format("screen.charginggadgets.energy", MagicHelpers.withSuffix(this.container.data.get(0))),
                     this.container.data.get(2) <= 0 ?
                             I18n.format("screen.charginggadgets.no_fuel") :
-                            I18n.format("screen.charginggadgets.burn_time", ticksInSeconds(this.container.data.get(2)))
+                            I18n.format("screen.charginggadgets.burn_time", MagicHelpers.ticksInSeconds(this.container.data.get(2)))
             ), mouseX, mouseY);
     }
 
@@ -71,21 +72,6 @@ public class ChargingStationScreen  extends ContainerScreen<ChargingStationConta
     @Override
     protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
         Minecraft.getInstance().fontRenderer.drawString(I18n.format("block.charginggadgets.charging_station"), 55, 8, Color.DARK_GRAY.getRGB());
-    }
-
-    public static String withSuffix(int count) {
-        if (count < 1000) return "" + count;
-        int exp = (int) (Math.log(count) / Math.log(1000));
-        return String.format("%.1f%c",
-                count / Math.pow(1000, exp),
-                "kMGTPE".charAt(exp - 1));
-    }
-
-    private static final BigDecimal TWENTY = new BigDecimal(20);
-    public static String ticksInSeconds(int ticks) {
-        BigDecimal value = new BigDecimal(ticks);
-        value = value.divide(TWENTY, 1, RoundingMode.HALF_UP);
-        return value.toString();
     }
 }
 

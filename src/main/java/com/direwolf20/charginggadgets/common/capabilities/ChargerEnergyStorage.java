@@ -3,7 +3,6 @@ package com.direwolf20.charginggadgets.common.capabilities;
 import com.direwolf20.charginggadgets.common.tiles.ChargingStationTile;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraftforge.common.util.INBTSerializable;
-import net.minecraftforge.energy.EnergyStorage;
 import net.minecraftforge.energy.IEnergyStorage;
 
 public class ChargerEnergyStorage implements IEnergyStorage, INBTSerializable<CompoundNBT> {
@@ -50,6 +49,10 @@ public class ChargerEnergyStorage implements IEnergyStorage, INBTSerializable<Co
             energy -= energyExtracted;
 
         return energyExtracted;
+    }
+
+    public void setEnergy(int energy) {
+        this.energy = energy;
     }
 
     // We don't use this method and thus we don't let other people use it either

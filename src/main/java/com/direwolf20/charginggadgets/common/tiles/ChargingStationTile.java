@@ -13,7 +13,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SUpdateTileEntityPacket;
-import net.minecraft.tileentity.AbstractFurnaceTileEntity;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
@@ -26,7 +25,6 @@ import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.EnergyStorage;
 import net.minecraftforge.energy.IEnergyStorage;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
@@ -53,7 +51,8 @@ public class ChargingStationTile extends TileEntity implements ITickableTileEnti
     private int counter = 0;
     private int maxBurn = 0;
 
-    private LazyOptional<ChargerEnergyStorage> energy = LazyOptional.of(() -> new ChargerEnergyStorage(this, 0, Config.GENERAL.chargerMaxPower.get()));
+    public ChargerEnergyStorage energyStorage;
+    private LazyOptional<ChargerEnergyStorage> energy;
     private LazyOptional<ItemStackHandler> inventory  = LazyOptional.of(() -> new ChargerItemHandler(this));
 
     // Handles tracking changes, kinda messy but apparently this is how the cool kids do it these days
@@ -87,6 +86,8 @@ public class ChargingStationTile extends TileEntity implements ITickableTileEnti
 
     public ChargingStationTile() {
         super(ModBlocks.CHARGING_STATION_TILE.get());
+        this.energyStorage = new ChargerEnergyStorage(this, 0, Config.GENERAL.chargerMaxPower.get());
+        this.energy = LazyOptional.of(() -> this.energyStorage);
     }
 
     @Nullable

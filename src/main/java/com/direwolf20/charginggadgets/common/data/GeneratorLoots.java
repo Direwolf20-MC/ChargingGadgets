@@ -9,6 +9,7 @@ import net.minecraft.data.LootTableProvider;
 import net.minecraft.data.loot.BlockLootTables;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.storage.loot.*;
+import net.minecraft.world.storage.loot.conditions.SurvivesExplosion;
 import net.minecraft.world.storage.loot.functions.CopyName;
 import net.minecraft.world.storage.loot.functions.CopyNbt;
 import net.minecraft.world.storage.loot.functions.ILootFunction;
@@ -36,16 +37,18 @@ public class GeneratorLoots extends LootTableProvider {
         @Override
         protected void addTables() {
             LootPool.Builder builder = LootPool.builder()
-                    .name("charging_gadget")
+                    .name(ModBlocks.CHARGING_STATION.get().getRegistryName().toString())
                     .rolls(ConstantRange.of(1))
+                    .acceptCondition(SurvivesExplosion.builder())
                     .addEntry(ItemLootEntry.builder(ModBlocks.CHARGING_STATION.get())
+                            .acceptFunction(CopyName.builder(CopyName.Source.BLOCK_ENTITY))
 // todo: figure out why these don't work
 //                            .acceptFunction(CopyName.builder(CopyName.Source.BLOCK_ENTITY))
 //                            .acceptFunction(CopyNbt.builder(CopyNbt.Source.BLOCK_ENTITY)
 //                                    .addOperation("inv", "BlockEntityTag.inv", CopyNbt.Action.REPLACE)
 //                                    .addOperation("energy", "BlockEntityTag.energy", CopyNbt.Action.REPLACE))
-                            .acceptFunction(SetContents.func_215920_b()
-                                    .func_216075_a(DynamicLootEntry.func_216162_a(new ResourceLocation("minecraft", "contents"))))
+//                            .acceptFunction(SetContents.func_215920_b()
+//                                    .func_216075_a(DynamicLootEntry.func_216162_a(new ResourceLocation("minecraft", "contents"))))
                     );
 
             this.registerLootTable(ModBlocks.CHARGING_STATION.get(), LootTable.builder().addLootPool(builder));

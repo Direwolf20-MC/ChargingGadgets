@@ -26,7 +26,6 @@ import net.minecraft.world.storage.loot.LootContext;
 import net.minecraft.world.storage.loot.LootParameters;
 import net.minecraftforge.common.ToolType;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.fml.network.NetworkHooks;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
@@ -63,30 +62,14 @@ public class ChargingStationBlock extends Block {
         List<ItemStack> drops = super.getDrops(state, builder);
         if (te instanceof ChargingStationTile) {
             ChargingStationTile tileEntity = (ChargingStationTile) te;
-            tileEntity.getCapability(CapabilityEnergy.ENERGY).ifPresent(System.out::println);
-
-            System.out.println(drops);
             drops.stream()
                     .filter(e -> e.getItem() instanceof ChargingStationItem)
                     .findFirst()
-                    .ifPresent(e -> {
-                        System.out.println("Found item");
-                        this.setupItem(tileEntity, e);
-                    });
+                    .ifPresent(e -> e.getOrCreateTag().putInt("energy", tileEntity.energyStorage.getEnergyStored()));
         }
 
         return drops;
     }
-
-    public void setupItem(ChargingStationTile tile, ItemStack item) {
-        tile.getCapability(CapabilityEnergy.ENERGY).ifPresent(System.out::println);
-        System.out.println(item);
-        tile.getCapability(CapabilityEnergy.ENERGY).ifPresent(e -> item.getCapability(CapabilityEnergy.ENERGY).ifPresent(a -> {
-            System.out.println("Attempting to give power");
-            a.receiveEnergy(e.getMaxEnergyStored(), false);
-        }));
-    }
-
 
     @Override
     @SuppressWarnings("deprecation")
