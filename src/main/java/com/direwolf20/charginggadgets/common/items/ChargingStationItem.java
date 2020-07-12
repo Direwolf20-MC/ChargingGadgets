@@ -35,7 +35,7 @@ public class ChargingStationItem extends BlockItem {
         if( power == 0 )
             return;
 
-        tooltip.add(new TranslationTextComponent("screen.charginggadgets.energy", MagicHelpers.withSuffix(power), MagicHelpers.withSuffix(Config.GENERAL.chargerMaxPower.get())).applyTextStyle(TextFormatting.GREEN));
+        tooltip.add(new TranslationTextComponent("screen.charginggadgets.energy", MagicHelpers.withSuffix(power), MagicHelpers.withSuffix(Config.GENERAL.chargerMaxPower.get())).mergeStyle(TextFormatting.GREEN));
     }
 
     @Override

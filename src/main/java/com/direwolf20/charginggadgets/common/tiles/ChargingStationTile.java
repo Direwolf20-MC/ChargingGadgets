@@ -5,6 +5,7 @@ import com.direwolf20.charginggadgets.common.blocks.ModBlocks;
 import com.direwolf20.charginggadgets.common.capabilities.ChargerEnergyStorage;
 import com.direwolf20.charginggadgets.common.capabilities.ChargerItemHandler;
 import com.direwolf20.charginggadgets.common.container.ChargingStationContainer;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.container.Container;
@@ -174,8 +175,8 @@ public class ChargingStationTile extends TileEntity implements ITickableTileEnti
     }
 
     @Override
-    public void read(CompoundNBT compound) {
-        super.read(compound);
+    public void read(BlockState stateIn, CompoundNBT compound) {
+        super.read(stateIn, compound);
 
         inventory.ifPresent(h -> h.deserializeNBT(compound.getCompound("inv")));
         energy.ifPresent(h -> h.deserializeNBT(compound.getCompound("energy")));
@@ -217,13 +218,13 @@ public class ChargingStationTile extends TileEntity implements ITickableTileEnti
     }
 
     @Override
-    public void handleUpdateTag(CompoundNBT tag) {
-        read(tag);
+    public void handleUpdateTag(BlockState stateIn, CompoundNBT tag) {
+        read(stateIn, tag);
     }
 
     @Override
     public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
-        read(pkt.getNbtCompound());
+        read(this.getBlockState(), pkt.getNbtCompound());
     }
 
     @Override
