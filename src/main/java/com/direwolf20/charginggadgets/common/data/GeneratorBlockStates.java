@@ -17,12 +17,12 @@ final class GeneratorBlockStates extends BlockStateProvider {
 
     @Override
     protected void registerStatesAndModels() {
-        models().orientableWithBottom(
+        horizontalBlock(ModBlocks.CHARGING_STATION.get(), models().orientableWithBottom(
                 Objects.requireNonNull(ModBlocks.CHARGING_STATION.get().getRegistryName()).getPath(),
                 modLoc("blocks/charging_station_side"),
                 modLoc("blocks/charging_station_fronton"),
                 modLoc("blocks/charging_station_bottom"),
                 modLoc("blocks/charging_station_top")
-        );
+        ));
     }
 }

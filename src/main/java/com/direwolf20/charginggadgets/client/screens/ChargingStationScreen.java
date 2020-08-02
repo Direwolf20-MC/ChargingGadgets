@@ -55,8 +55,8 @@ public class ChargingStationScreen  extends ContainerScreen<ChargingStationConta
         super.init();
     }
 
-    @Override // @mcp: func_230450_a_ = drawGuiContainerBackgroundLayer
-    protected void func_230450_a_(MatrixStack stack, float partialTicks, int mouseX, int mouseY) {
+    @Override
+    protected void drawGuiContainerBackgroundLayer(MatrixStack stack, float partialTicks, int mouseX, int mouseY) {
         RenderSystem.color4f(1, 1, 1, 1);
         getMinecraft().getTextureManager().bindTexture(background);
         this.blit(stack, guiLeft, guiTop, 0, 0, xSize, ySize);
@@ -74,8 +74,8 @@ public class ChargingStationScreen  extends ContainerScreen<ChargingStationConta
         }
     }
 
-    @Override // @mcp: func_230451_b_ = drawGuiContainerForegroundLayer
-    protected void func_230451_b_(MatrixStack stack, int mouseX, int mouseY) {
+    @Override
+    protected void drawGuiContainerForegroundLayer(MatrixStack stack, int mouseX, int mouseY) {
         Minecraft.getInstance().fontRenderer.drawString(stack, I18n.format("block.charginggadgets.charging_station"), 55, 8, Color.DARK_GRAY.getRGB());
     }
 }
