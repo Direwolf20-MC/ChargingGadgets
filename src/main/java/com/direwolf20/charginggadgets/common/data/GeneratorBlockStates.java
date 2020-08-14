@@ -8,6 +8,8 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.model.generators.*;
 
+import java.util.Objects;
+
 final class GeneratorBlockStates extends BlockStateProvider {
     public GeneratorBlockStates(DataGenerator gen, ExistingFileHelper exFileHelper) {
         super(gen, ChargingGadgets.MOD_ID, exFileHelper);
@@ -17,22 +19,12 @@ final class GeneratorBlockStates extends BlockStateProvider {
     protected void registerStatesAndModels() {
         assert ModBlocks.CHARGING_STATION.get().getRegistryName() != null;
 
-        ResourceLocation side = modLoc("blocks/charging_station_side");
-
-        BlockModelBuilder cube = models().cube(
-                ModBlocks.CHARGING_STATION.get().getRegistryName().getPath(),
-                modLoc("blocks/charging_station_bottom"),
-                modLoc("blocks/charging_station_top"),
+        horizontalBlock(ModBlocks.CHARGING_STATION.get(), models().orientableWithBottom(
+                Objects.requireNonNull(ModBlocks.CHARGING_STATION.get().getRegistryName()).getPath(),
+                modLoc("blocks/charging_station_side"),
                 modLoc("blocks/charging_station_fronton"),
-                side, side, side
-        ).texture("particle", side);
-
-        getVariantBuilder(ModBlocks.CHARGING_STATION.get())
-                .forAllStates(state -> {
-                    Direction dir = state.get(ChargingStationBlock.FACING);
-                    return ConfiguredModel.builder().modelFile(cube).rotationY(
-                            dir.getAxis().isVertical() ? 0 : (((int) dir.getHorizontalAngle()) + 180) % 360
-                    ).build();
-                });
+                modLoc("blocks/charging_station_bottom"),
+                modLoc("blocks/charging_station_top")
+        ));
     }
 }

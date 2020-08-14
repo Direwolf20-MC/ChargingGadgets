@@ -133,7 +133,7 @@ public class ChargingStationTile extends TileEntity implements ITickableTileEnti
             return;
 
         this.getCapability(CapabilityEnergy.ENERGY).ifPresent(energyStorage -> {
-            boolean canInsertEnergy = energyStorage.receiveEnergy(2500, true) > 0;
+            boolean canInsertEnergy = energyStorage.receiveEnergy(625, true) > 0;
             if (counter > 0 && canInsertEnergy) {
                 burn(energyStorage);
             } else if (canInsertEnergy) {
@@ -145,7 +145,7 @@ public class ChargingStationTile extends TileEntity implements ITickableTileEnti
 
 
     private void burn(IEnergyStorage energyStorage) {
-        energyStorage.receiveEnergy(2500, false);
+        energyStorage.receiveEnergy(625, false);
 
         counter--;
         if (counter == 0) {
