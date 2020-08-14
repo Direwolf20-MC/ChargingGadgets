@@ -5,6 +5,7 @@ import com.direwolf20.charginggadgets.common.Config;
 import com.direwolf20.charginggadgets.common.capabilities.ChargerEnergyStorage;
 import com.direwolf20.charginggadgets.common.container.ChargingStationContainer;
 import com.direwolf20.charginggadgets.common.utils.MagicHelpers;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
@@ -14,6 +15,7 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.container.FurnaceContainer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.common.Tags;
 import net.minecraftforge.energy.CapabilityEnergy;
 
@@ -34,17 +36,17 @@ public class ChargingStationScreen  extends ContainerScreen<ChargingStationConta
     }
 
     @Override
-    public void render(int mouseX, int mouseY, float partialTicks) {
-        this.renderBackground();
-        super.render(mouseX, mouseY, partialTicks);
+    public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+        this.renderBackground(stack);
+        super.render(stack, mouseX, mouseY, partialTicks);
 
-        this.renderHoveredToolTip(mouseX, mouseY);
+        this.func_230459_a_(stack, mouseX, mouseY); // @mcp: func_230459_a_ = renderHoveredToolTip
         if (mouseX > (guiLeft + 7) && mouseX < (guiLeft + 7) + 18 && mouseY > (guiTop + 7) && mouseY < (guiTop + 7) + 73)
-            this.renderTooltip(Arrays.asList(
-                    I18n.format("screen.charginggadgets.energy", MagicHelpers.withSuffix(this.container.getEnergy()), MagicHelpers.withSuffix(this.container.getMaxPower())),
+            this.renderTooltip(stack, Arrays.asList(
+                    new TranslationTextComponent("screen.charginggadgets.energy", MagicHelpers.withSuffix(this.container.getEnergy()), MagicHelpers.withSuffix(this.container.getMaxPower())),
                     this.container.getRemaining() <= 0 ?
-                            I18n.format("screen.charginggadgets.no_fuel") :
-                            I18n.format("screen.charginggadgets.burn_time", MagicHelpers.ticksInSeconds(this.container.getRemaining()))
+                            new TranslationTextComponent("screen.charginggadgets.no_fuel") :
+                            new TranslationTextComponent("screen.charginggadgets.burn_time", MagicHelpers.ticksInSeconds(this.container.getRemaining()))
             ), mouseX, mouseY);
     }
 
@@ -54,27 +56,27 @@ public class ChargingStationScreen  extends ContainerScreen<ChargingStationConta
     }
 
     @Override
-    protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
+    protected void drawGuiContainerBackgroundLayer(MatrixStack stack, float partialTicks, int mouseX, int mouseY) {
         RenderSystem.color4f(1, 1, 1, 1);
         getMinecraft().getTextureManager().bindTexture(background);
-        blit(guiLeft, guiTop, 0, 0, xSize, ySize);
+        this.blit(stack, guiLeft, guiTop, 0, 0, xSize, ySize);
 
         int maxHeight = 13;
         if (this.container.getMaxBurn() > 0) {
             int remaining = (this.container.getRemaining() * maxHeight) / this.container.getMaxBurn();
-            this.blit(guiLeft + 66, guiTop + 26 + 13 - remaining, 176, 13 - remaining, 14, remaining + 1);
+            this.blit(stack, guiLeft + 66, guiTop + 26 + 13 - remaining, 176, 13 - remaining, 14, remaining + 1);
         }
 
         int maxEnergy = this.container.getMaxPower(), height = 70;
         if (maxEnergy > 0) {
             int remaining = (this.container.getEnergy() * height) / maxEnergy;
-            this.blit(guiLeft + 8, guiTop + 78 - remaining, 176, 84 - remaining, 16, remaining + 1);
+            this.blit(stack, guiLeft + 8, guiTop + 78 - remaining, 176, 84 - remaining, 16, remaining + 1);
         }
     }
 
     @Override
-    protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
-        Minecraft.getInstance().fontRenderer.drawString(I18n.format("block.charginggadgets.charging_station"), 55, 8, Color.DARK_GRAY.getRGB());
+    protected void drawGuiContainerForegroundLayer(MatrixStack stack, int mouseX, int mouseY) {
+        Minecraft.getInstance().fontRenderer.drawString(stack, I18n.format("block.charginggadgets.charging_station"), 55, 8, Color.DARK_GRAY.getRGB());
     }
 }
 

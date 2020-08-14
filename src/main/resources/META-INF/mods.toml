@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[31,)"
+loaderVersion="[32,)"
 issueTrackerURL="https://github.com/Direwolf20-MC/ChargingGadgets/issues"
 
 [[mods]]
@@ -14,10 +14,11 @@ authors="Direwolf20, ErrorMikey"
 description='''
     It's a gadget (or a block?) that charges things, what more could you ask for?
 '''
+license="MIT (https://github.com/Direwolf20-MC/ChargingGadgets/blob/master/LICENSE.md)"
 
 [[dependencies.charginggadgets]]
     modId="forge"
     mandatory=true
-    versionRange="[31,)"
+    versionRange="[32,)"
     ordering="NONE"
     side="BOTH"
