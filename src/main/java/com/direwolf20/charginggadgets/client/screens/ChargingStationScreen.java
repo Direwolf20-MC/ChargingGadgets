@@ -15,6 +15,7 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.container.FurnaceContainer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.LanguageMap;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.common.Tags;
 import net.minecraftforge.energy.CapabilityEnergy;
@@ -42,12 +43,12 @@ public class ChargingStationScreen  extends ContainerScreen<ChargingStationConta
 
         this.func_230459_a_(stack, mouseX, mouseY); // @mcp: func_230459_a_ = renderHoveredToolTip
         if (mouseX > (guiLeft + 7) && mouseX < (guiLeft + 7) + 18 && mouseY > (guiTop + 7) && mouseY < (guiTop + 7) + 73)
-            this.renderTooltip(stack, Arrays.asList(
+            this.renderTooltip(stack, LanguageMap.getInstance().func_244260_a(Arrays.asList(
                     new TranslationTextComponent("screen.charginggadgets.energy", MagicHelpers.withSuffix(this.container.getEnergy()), MagicHelpers.withSuffix(this.container.getMaxPower())),
                     this.container.getRemaining() <= 0 ?
                             new TranslationTextComponent("screen.charginggadgets.no_fuel") :
                             new TranslationTextComponent("screen.charginggadgets.burn_time", MagicHelpers.ticksInSeconds(this.container.getRemaining()))
-            ), mouseX, mouseY);
+            )), mouseX, mouseY);
     }
 
     @Override
