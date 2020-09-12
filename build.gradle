@@ -115,8 +115,8 @@ dependencies {
     minecraft "net.minecraftforge:forge:${forge_version}"
 
     //JEI
-    compileOnly fg.deobf("mezz.jei:jei-${jei_version}:api")
-    runtimeOnly fg.deobf("mezz.jei:jei-${jei_version}")
+//    compileOnly fg.deobf("mezz.jei:jei-${jei_version}:api")
+//    runtimeOnly fg.deobf("mezz.jei:jei-${jei_version}")
 
 //    runtimeOnly fg.deobf("ignored:buildinggadgets:3.3.2")
 //    runtimeOnly fg.deobf("ignored:mininggadgets:1.4.0")

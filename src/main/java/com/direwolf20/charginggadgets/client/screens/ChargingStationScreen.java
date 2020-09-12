@@ -41,7 +41,7 @@ public class ChargingStationScreen  extends ContainerScreen<ChargingStationConta
         this.renderBackground(stack);
         super.render(stack, mouseX, mouseY, partialTicks);
 
-        this.func_230459_a_(stack, mouseX, mouseY); // @mcp: func_230459_a_ = renderHoveredToolTip
+        this.renderHoveredTooltip(stack, mouseX, mouseY); // @mcp: func_230459_a_ = renderHoveredToolTip
         if (mouseX > (guiLeft + 7) && mouseX < (guiLeft + 7) + 18 && mouseY > (guiTop + 7) && mouseY < (guiTop + 7) + 73)
             this.renderTooltip(stack, LanguageMap.getInstance().func_244260_a(Arrays.asList(
                     new TranslationTextComponent("screen.charginggadgets.energy", MagicHelpers.withSuffix(this.container.getEnergy()), MagicHelpers.withSuffix(this.container.getMaxPower())),
