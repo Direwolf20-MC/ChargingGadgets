@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[33,)"
+loaderVersion="[34,)"
 issueTrackerURL="https://github.com/Direwolf20-MC/ChargingGadgets/issues"
 license="MIT (https://github.com/Direwolf20-MC/ChargingGadgets/blob/master/LICENSE.md)"
 
@@ -19,6 +19,6 @@ description='''
 [[dependencies.charginggadgets]]
     modId="forge"
     mandatory=true
-    versionRange="[33,)"
+    versionRange="[34,)"
     ordering="NONE"
     side="BOTH"

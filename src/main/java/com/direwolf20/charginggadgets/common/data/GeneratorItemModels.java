@@ -3,9 +3,9 @@ package com.direwolf20.charginggadgets.common.data;
 import com.direwolf20.charginggadgets.common.ChargingGadgets;
 import com.direwolf20.charginggadgets.common.blocks.ModBlocks;
 import net.minecraft.data.DataGenerator;
-import net.minecraftforge.client.model.generators.ExistingFileHelper;
 import net.minecraftforge.client.model.generators.ItemModelProvider;
 import net.minecraftforge.client.model.generators.ModelFile;
+import net.minecraftforge.common.data.ExistingFileHelper;
 
 final class GeneratorItemModels extends ItemModelProvider {
     public GeneratorItemModels(DataGenerator generator, ExistingFileHelper existingFileHelper) {
