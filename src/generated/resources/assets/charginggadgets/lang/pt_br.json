@@ -1,0 +1,8 @@
+  
+{
+  "block.charginggadgets.charging_station": "Estação de Carregamento",
+  "itemGroup.charginggadgets": "Charging Gadgets",
+  "screen.charginggadgets.burn_time": "Tempo restante de queima: %ss",
+  "screen.charginggadgets.energy": "Energia: %s/%s FE",
+  "screen.charginggadgets.no_fuel": "Fonte de combustível vazia"
+}
