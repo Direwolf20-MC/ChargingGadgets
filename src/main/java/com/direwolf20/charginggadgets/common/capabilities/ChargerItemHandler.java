@@ -1,9 +1,8 @@
 package com.direwolf20.charginggadgets.common.capabilities;
 
 import com.direwolf20.charginggadgets.common.tiles.ChargingStationTile;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.util.NonNullList;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.items.ItemStackHandler;
@@ -20,7 +19,7 @@ public class ChargerItemHandler extends ItemStackHandler {
 
     @Override
     protected void onContentsChanged(int slot) {
-        chargingStationTile.markDirty();
+        chargingStationTile.setChanged();
     }
 
     @Nonnull

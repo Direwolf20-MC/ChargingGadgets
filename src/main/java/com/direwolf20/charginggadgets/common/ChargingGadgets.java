@@ -2,10 +2,10 @@ package com.direwolf20.charginggadgets.common;
 
 import com.direwolf20.charginggadgets.client.screens.ChargingStationScreen;
 import com.direwolf20.charginggadgets.common.blocks.ModBlocks;
-import net.minecraft.client.gui.ScreenManager;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
+import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -24,14 +24,14 @@ public class ChargingGadgets
     private static final Logger LOGGER = LogManager.getLogger();
 
     // Item Groups
-    public static final ItemGroup ITEM_GROUP = new ItemGroup(MOD_ID) {
+    public static final CreativeModeTab ITEM_GROUP = new CreativeModeTab(MOD_ID) {
         @Override
-        public ItemStack createIcon() {
+        public ItemStack makeIcon() {
             return new ItemStack(ModBlocks.CHARGING_STATION.get());
         }
     };
 
-    public static final Item.Properties ITEM_PROPS = new Item.Properties().group(ITEM_GROUP);
+    public static final Item.Properties ITEM_PROPS = new Item.Properties().tab(ITEM_GROUP);
 
     public ChargingGadgets() {
         IEventBus event = FMLJavaModLoadingContext.get().getModEventBus();
@@ -54,7 +54,7 @@ public class ChargingGadgets
     }
 
     private void clientSetup(final FMLClientSetupEvent event) {
-        ScreenManager.registerFactory(ModBlocks.CHARGING_STATION_CONTAINER.get(), ChargingStationScreen::new);
+        MenuScreens.register(ModBlocks.CHARGING_STATION_CONTAINER.get(), ChargingStationScreen::new);
         // need the render
 //        FMLJavaModLoadingContext.get().getModEventBus().addListener(e -> {
 //            ClientRegistry.bindTileEntityRenderer(ChargingStationTile.TYPE, ChargingStationTER::new);

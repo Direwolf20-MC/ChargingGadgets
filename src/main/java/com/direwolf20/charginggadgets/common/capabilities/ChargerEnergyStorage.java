@@ -1,32 +1,32 @@
 package com.direwolf20.charginggadgets.common.capabilities;
 
 import com.direwolf20.charginggadgets.common.tiles.ChargingStationTile;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.energy.IEnergyStorage;
 
-public class ChargerEnergyStorage implements IEnergyStorage, INBTSerializable<CompoundNBT> {
+public class ChargerEnergyStorage implements IEnergyStorage, INBTSerializable<CompoundTag> {
     private static final String KEY = "energy";
     private int energy;
     private int capacity;
     private int maxInOut = 1000000;
     private ChargingStationTile tile;
 
-    public ChargerEnergyStorage(ChargingStationTile tile,int energy, int capacity) {
+    public ChargerEnergyStorage(ChargingStationTile tile, int energy, int capacity) {
         this.energy = energy;
         this.capacity = capacity;
         this.tile = tile;
     }
 
     @Override
-    public CompoundNBT serializeNBT() {
-        CompoundNBT tag = new CompoundNBT();
+    public CompoundTag serializeNBT() {
+        CompoundTag tag = new CompoundTag();
         tag.putInt(KEY, this.energy);
         return tag;
     }
 
     @Override
-    public void deserializeNBT(CompoundNBT nbt) {
+    public void deserializeNBT(CompoundTag nbt) {
         this.energy = nbt.getInt(KEY);
     }
 
@@ -36,7 +36,7 @@ public class ChargerEnergyStorage implements IEnergyStorage, INBTSerializable<Co
 
         if (!simulate) {
             energy += energyReceived;
-            this.tile.markDirty();
+            this.tile.setChanged();
         }
 
         return energyReceived;

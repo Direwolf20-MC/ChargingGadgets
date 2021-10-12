@@ -2,16 +2,16 @@ package com.direwolf20.charginggadgets.common.container;
 
 import com.direwolf20.charginggadgets.common.blocks.ModBlocks;
 import com.direwolf20.charginggadgets.common.tiles.ChargingStationTile;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.IIntArray;
-import net.minecraft.util.IntArray;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.inventory.ContainerData;
+import net.minecraft.world.inventory.SimpleContainerData;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.items.IItemHandler;
@@ -21,20 +21,20 @@ import net.minecraftforge.items.SlotItemHandler;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class ChargingStationContainer extends Container {
+public class ChargingStationContainer extends AbstractContainerMenu {
     private static final int SLOTS = 2;
 
-    public final IIntArray data;
+    public final ContainerData data;
     public ItemStackHandler handler;
 
     // Tile can be null and shouldn't be used for accessing any data that needs to be up to date on both sides
     private ChargingStationTile tile;
 
-    public ChargingStationContainer(int windowId, PlayerInventory playerInventory, PacketBuffer extraData) {
-        this((ChargingStationTile) playerInventory.player.world.getTileEntity(extraData.readBlockPos()), new IntArray(4), windowId, playerInventory, new ItemStackHandler(2));
+    public ChargingStationContainer(int windowId, Inventory playerInventory, FriendlyByteBuf extraData) {
+        this((ChargingStationTile) playerInventory.player.level.getBlockEntity(extraData.readBlockPos()), new SimpleContainerData(4), windowId, playerInventory, new ItemStackHandler(2));
     }
 
-    public ChargingStationContainer(@Nullable ChargingStationTile tile, IIntArray chargingStationData, int windowId, PlayerInventory playerInventory, ItemStackHandler handler) {
+    public ChargingStationContainer(@Nullable ChargingStationTile tile, ContainerData chargingStationData, int windowId, Inventory playerInventory, ItemStackHandler handler) {
         super(ModBlocks.CHARGING_STATION_CONTAINER.get(), windowId);
 
         this.handler = handler;
@@ -43,15 +43,15 @@ public class ChargingStationContainer extends Container {
         this.data = chargingStationData;
         this.setup(playerInventory);
 
-        trackIntArray(chargingStationData);
+        addDataSlots(chargingStationData);
     }
 
-    public void setup(PlayerInventory inventory) {
+    public void setup(Inventory inventory) {
         addSlot(new RestrictedSlot(handler, 0, 65, 43));
         addSlot(new RestrictedSlot(handler, 1, 119, 43));
 
         // Slots for the hotbar
-        for (int row = 0; row < 9; ++ row) {
+        for (int row = 0; row < 9; ++row) {
             int x = 8 + row * 18;
             int y = 56 + 86;
             addSlot(new Slot(inventory, row, x, y));
@@ -67,26 +67,26 @@ public class ChargingStationContainer extends Container {
     }
 
     @Override
-    public ItemStack transferStackInSlot(PlayerEntity playerIn, int index) {
+    public ItemStack quickMoveStack(Player playerIn, int index) {
         ItemStack itemstack = ItemStack.EMPTY;
-        Slot slot = this.inventorySlots.get(index);
+        Slot slot = this.slots.get(index);
 
-        if (slot != null && slot.getHasStack()) {
-            ItemStack currentStack = slot.getStack();
+        if (slot != null && slot.hasItem()) {
+            ItemStack currentStack = slot.getItem();
             itemstack = currentStack.copy();
 
             if (index < SLOTS) {
-                if (! this.mergeItemStack(currentStack, SLOTS, this.inventorySlots.size(), false)) {
+                if (!this.moveItemStackTo(currentStack, SLOTS, this.slots.size(), false)) {
                     return ItemStack.EMPTY;
                 }
-            } else if (! this.mergeItemStack(currentStack, 0, SLOTS, false)) {
+            } else if (!this.moveItemStackTo(currentStack, 0, SLOTS, false)) {
                 return ItemStack.EMPTY;
             }
 
             if (currentStack.isEmpty()) {
-                slot.putStack(ItemStack.EMPTY);
+                slot.set(ItemStack.EMPTY);
             } else {
-                slot.onSlotChanged();
+                slot.setChanged();
             }
         }
 
@@ -94,9 +94,9 @@ public class ChargingStationContainer extends Container {
     }
 
     @Override
-    public boolean canInteractWith(PlayerEntity playerIn) {
-        BlockPos pos = this.tile.getPos();
-        return this.tile != null && !this.tile.isRemoved() && playerIn.getDistanceSq(new Vector3d(pos.getX(), pos.getY(), pos.getZ()).add(0.5D, 0.5D, 0.5D)) <= 64D;
+    public boolean stillValid(Player playerIn) {
+        BlockPos pos = this.tile.getBlockPos();
+        return this.tile != null && !this.tile.isRemoved() && playerIn.distanceToSqr(new Vec3(pos.getX(), pos.getY(), pos.getZ()).add(0.5D, 0.5D, 0.5D)) <= 64D;
     }
 
     public int getMaxPower() {
@@ -121,14 +121,14 @@ public class ChargingStationContainer extends Container {
         }
 
         @Override
-        public boolean isItemValid(@Nonnull ItemStack stack) {
-            if( getSlotIndex() == ChargingStationTile.Slots.CHARGE.getId() )
+        public boolean mayPlace(@Nonnull ItemStack stack) {
+            if (getSlotIndex() == ChargingStationTile.Slots.CHARGE.getId())
                 return stack.getCapability(CapabilityEnergy.ENERGY).isPresent();
 
-            if( getSlotIndex() == ChargingStationTile.Slots.FUEL.getId() )
+            if (getSlotIndex() == ChargingStationTile.Slots.FUEL.getId())
                 return ForgeHooks.getBurnTime(stack) != 0;
 
-            return super.isItemValid(stack);
+            return super.mayPlace(stack);
         }
     }
 }
