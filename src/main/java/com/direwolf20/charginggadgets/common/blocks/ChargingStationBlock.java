@@ -3,6 +3,9 @@ package com.direwolf20.charginggadgets.common.blocks;
 import com.direwolf20.charginggadgets.common.items.ChargingStationItem;
 import com.direwolf20.charginggadgets.common.tiles.ChargingStationTile;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.entity.player.Player;
@@ -33,7 +36,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 
-public class ChargingStationBlock extends Block {
+public class ChargingStationBlock extends Block implements EntityBlock {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
 
     public ChargingStationBlock() {
@@ -52,6 +55,12 @@ public class ChargingStationBlock extends Block {
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
         return defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
+    }
+
+    @Nullable
+    @Override
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
+        return level.isClientSide() ? null : ChargingStationTile::ticker;
     }
 
     @Override
@@ -104,12 +113,7 @@ public class ChargingStationBlock extends Block {
 
     @Nullable
     @Override
-    public BlockEntity createTileEntity(BlockState state, BlockGetter world) {
-        return ModBlocks.CHARGING_STATION_TILE.get().create();
-    }
-
-    @Override
-    public boolean hasTileEntity(BlockState state) {
-        return true;
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return ModBlocks.CHARGING_STATION_TILE.get().create(pos, state);
     }
 }

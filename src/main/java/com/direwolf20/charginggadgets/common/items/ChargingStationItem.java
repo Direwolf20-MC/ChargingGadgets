@@ -5,23 +5,16 @@ import com.direwolf20.charginggadgets.common.tiles.ChargingStationTile;
 import com.direwolf20.charginggadgets.common.utils.MagicHelpers;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.core.BlockPos;
-import net.minecraft.util.text.*;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.common.capabilities.ICapabilityProvider;
-import net.minecraftforge.energy.CapabilityEnergy;
 
 import javax.annotation.Nullable;
 import java.util.List;
-
-import net.minecraft.world.item.Item.Properties;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;

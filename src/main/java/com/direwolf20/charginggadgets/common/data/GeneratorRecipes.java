@@ -16,7 +16,7 @@ public final class GeneratorRecipes extends RecipeProvider {
     }
 
     @Override
-    protected void buildShapelessRecipes(Consumer<FinishedRecipe> consumer) {
+    protected void buildCraftingRecipes(Consumer<FinishedRecipe> consumer) {
         Block block = ModBlocks.CHARGING_STATION.get();
         ShapedRecipeBuilder
                 .shaped(block)

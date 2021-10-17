@@ -11,6 +11,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.energy.CapabilityEnergy;
@@ -126,7 +127,7 @@ public class ChargingStationContainer extends AbstractContainerMenu {
                 return stack.getCapability(CapabilityEnergy.ENERGY).isPresent();
 
             if (getSlotIndex() == ChargingStationTile.Slots.FUEL.getId())
-                return ForgeHooks.getBurnTime(stack) != 0;
+                return ForgeHooks.getBurnTime(stack, RecipeType.SMELTING) != 0;
 
             return super.mayPlace(stack);
         }

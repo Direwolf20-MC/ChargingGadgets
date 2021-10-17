@@ -1,7 +1,4 @@
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 package com.direwolf20.charginggadgets.common.tiles;
-
-import mcp.MethodsReturnNonnullByDefault;
 
 import javax.annotation.ParametersAreNonnullByDefault;

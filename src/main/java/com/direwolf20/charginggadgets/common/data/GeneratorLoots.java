@@ -7,7 +7,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.loot.LootTableProvider;
 import net.minecraft.data.loot.BlockLoot;
-import net.minecraft.loot.*;
 import net.minecraft.world.level.storage.loot.predicates.ExplosionCondition;
 import net.minecraft.world.level.storage.loot.functions.CopyNameFunction;
 import net.minecraft.resources.ResourceLocation;
@@ -25,6 +24,8 @@ import net.minecraft.world.level.storage.loot.ValidationContext;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSet;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
+import net.minecraft.world.level.storage.loot.providers.number.NumberProvider;
 
 public class GeneratorLoots extends LootTableProvider {
     public GeneratorLoots(DataGenerator dataGeneratorIn) {
@@ -41,7 +42,7 @@ public class GeneratorLoots extends LootTableProvider {
         protected void addTables() {
             LootPool.Builder builder = LootPool.lootPool()
                     .name(ModBlocks.CHARGING_STATION.get().getRegistryName().toString())
-                    .setRolls(ConstantIntValue.exactly(1))
+                    .setRolls(ConstantValue.exactly(1))
                     .when(ExplosionCondition.survivesExplosion())
                     .add(LootItem.lootTableItem(ModBlocks.CHARGING_STATION.get())
                                     .apply(CopyNameFunction.copyName(CopyNameFunction.NameSource.BLOCK_ENTITY))

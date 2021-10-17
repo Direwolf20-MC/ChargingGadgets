@@ -49,8 +49,8 @@ public class ChargingStationScreen extends AbstractContainerScreen<ChargingStati
 
     @Override
     protected void renderBg(PoseStack stack, float partialTicks, int mouseX, int mouseY) {
-        RenderSystem.color4f(1, 1, 1, 1);
-        getMinecraft().getTextureManager().bindForSetup(background);
+        RenderSystem.setShaderColor(1, 1, 1, 1);
+        RenderSystem.setShaderTexture(0, background);
         this.blit(stack, leftPos, topPos, 0, 0, imageWidth, imageHeight);
 
         int maxHeight = 13;
