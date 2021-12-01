@@ -1,6 +1,6 @@
-package com.direwolf20.charginggadgets.common.capabilities;
+package com.direwolf20.charginggadgets.capabilities;
 
-import com.direwolf20.charginggadgets.common.tiles.ChargingStationTile;
+import com.direwolf20.charginggadgets.blocks.chargingstation.ChargingStationTile;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.energy.IEnergyStorage;

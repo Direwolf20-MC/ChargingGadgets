@@ -1,8 +1,7 @@
-package com.direwolf20.charginggadgets.client.screens;
+package com.direwolf20.charginggadgets.blocks.chargingstation;
 
-import com.direwolf20.charginggadgets.common.ChargingGadgets;
-import com.direwolf20.charginggadgets.common.container.ChargingStationContainer;
-import com.direwolf20.charginggadgets.common.utils.MagicHelpers;
+import com.direwolf20.charginggadgets.ChargingGadgets;
+import com.direwolf20.charginggadgets.utils.MagicHelpers;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;

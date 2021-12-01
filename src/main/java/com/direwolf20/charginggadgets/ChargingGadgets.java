@@ -1,7 +1,7 @@
-package com.direwolf20.charginggadgets.common;
+package com.direwolf20.charginggadgets;
 
-import com.direwolf20.charginggadgets.client.screens.ChargingStationScreen;
-import com.direwolf20.charginggadgets.common.blocks.ModBlocks;
+import com.direwolf20.charginggadgets.blocks.chargingstation.ChargingStationScreen;
+import com.direwolf20.charginggadgets.blocks.BlockRegistry;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.CreativeModeTab;
@@ -16,6 +16,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 @Mod(ChargingGadgets.MOD_ID)
 public class ChargingGadgets
@@ -26,8 +27,8 @@ public class ChargingGadgets
     // Item Groups
     public static final CreativeModeTab ITEM_GROUP = new CreativeModeTab(MOD_ID) {
         @Override
-        public ItemStack makeIcon() {
-            return new ItemStack(ModBlocks.CHARGING_STATION.get());
+        public @NotNull ItemStack makeIcon() {
+            return new ItemStack(BlockRegistry.CHARGING_STATION.get());
         }
     };
 
@@ -36,10 +37,10 @@ public class ChargingGadgets
     public ChargingGadgets() {
         IEventBus event = FMLJavaModLoadingContext.get().getModEventBus();
 
-        ModBlocks.ITEMS.register(event);
-        ModBlocks.BLOCKS.register(event);
-        ModBlocks.TILES_ENTITIES.register(event);
-        ModBlocks.CONTAINERS.register(event);
+        BlockRegistry.ITEMS.register(event);
+        BlockRegistry.BLOCKS.register(event);
+        BlockRegistry.TILES_ENTITIES.register(event);
+        BlockRegistry.CONTAINERS.register(event);
 
         event.addListener(this::setup);
         event.addListener(this::clientSetup);
@@ -49,19 +50,10 @@ public class ChargingGadgets
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, Config.SERVER_CONFIG);
     }
 
-    private void setup(final FMLCommonSetupEvent event)
-    {
+    private void setup(final FMLCommonSetupEvent event) {
     }
 
     private void clientSetup(final FMLClientSetupEvent event) {
-        MenuScreens.register(ModBlocks.CHARGING_STATION_CONTAINER.get(), ChargingStationScreen::new);
-        // need the render
-//        FMLJavaModLoadingContext.get().getModEventBus().addListener(e -> {
-//            ClientRegistry.bindTileEntityRenderer(ChargingStationTile.TYPE, ChargingStationTER::new);
-//        });
-    }
-
-    public static Logger getLogger() {
-        return LOGGER;
+        MenuScreens.register(BlockRegistry.CHARGING_STATION_CONTAINER.get(), ChargingStationScreen::new);
     }
 }

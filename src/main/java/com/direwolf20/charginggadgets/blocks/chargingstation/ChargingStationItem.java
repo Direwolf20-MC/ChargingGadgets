@@ -1,8 +1,7 @@
-package com.direwolf20.charginggadgets.common.items;
+package com.direwolf20.charginggadgets.blocks.chargingstation;
 
-import com.direwolf20.charginggadgets.common.Config;
-import com.direwolf20.charginggadgets.common.tiles.ChargingStationTile;
-import com.direwolf20.charginggadgets.common.utils.MagicHelpers;
+import com.direwolf20.charginggadgets.Config;
+import com.direwolf20.charginggadgets.utils.MagicHelpers;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.item.TooltipFlag;
