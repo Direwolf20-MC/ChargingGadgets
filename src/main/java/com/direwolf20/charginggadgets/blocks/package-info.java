@@ -1,4 +1,4 @@
 @ParametersAreNonnullByDefault
-package com.direwolf20.charginggadgets.common.blocks;
+package com.direwolf20.charginggadgets.blocks;
 
 import javax.annotation.ParametersAreNonnullByDefault;

@@ -1,7 +1,6 @@
-package com.direwolf20.charginggadgets.common.blocks;
+package com.direwolf20.charginggadgets.blocks.chargingstation;
 
-import com.direwolf20.charginggadgets.common.items.ChargingStationItem;
-import com.direwolf20.charginggadgets.common.tiles.ChargingStationTile;
+import com.direwolf20.charginggadgets.blocks.BlockRegistry;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
@@ -25,12 +24,11 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.fmllegacy.network.NetworkHooks;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.network.NetworkHooks;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -114,6 +112,6 @@ public class ChargingStationBlock extends Block implements EntityBlock {
     @Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        return ModBlocks.CHARGING_STATION_TILE.get().create(pos, state);
+        return BlockRegistry.CHARGING_STATION_TILE.get().create(pos, state);
     }
 }

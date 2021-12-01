@@ -1,4 +1,4 @@
-package com.direwolf20.charginggadgets.common;
+package com.direwolf20.charginggadgets;
 
 import net.minecraftforge.common.ForgeConfigSpec;
 

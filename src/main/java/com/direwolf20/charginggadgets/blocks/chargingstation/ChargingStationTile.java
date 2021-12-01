@@ -1,13 +1,13 @@
-package com.direwolf20.charginggadgets.common.tiles;
+package com.direwolf20.charginggadgets.blocks.chargingstation;
 
-import com.direwolf20.charginggadgets.common.Config;
-import com.direwolf20.charginggadgets.common.blocks.ModBlocks;
-import com.direwolf20.charginggadgets.common.capabilities.ChargerEnergyStorage;
-import com.direwolf20.charginggadgets.common.capabilities.ChargerItemHandler;
-import com.direwolf20.charginggadgets.common.container.ChargingStationContainer;
+import com.direwolf20.charginggadgets.Config;
+import com.direwolf20.charginggadgets.blocks.BlockRegistry;
+import com.direwolf20.charginggadgets.capabilities.ChargerEnergyStorage;
+import com.direwolf20.charginggadgets.capabilities.ChargerItemHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.FurnaceBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.Inventory;
@@ -85,7 +85,7 @@ public class ChargingStationTile extends BlockEntity implements MenuProvider {
     };
 
     public ChargingStationTile(BlockPos pos, BlockState state) {
-        super(ModBlocks.CHARGING_STATION_TILE.get(), pos, state);
+        super(BlockRegistry.CHARGING_STATION_TILE.get(), pos, state);
         this.energyStorage = new ChargerEnergyStorage(this, 0, Config.GENERAL.chargerMaxPower.get());
         this.energy = LazyOptional.of(() -> this.energyStorage);
     }
@@ -180,13 +180,12 @@ public class ChargingStationTile extends BlockEntity implements MenuProvider {
     }
 
     @Override
-    public CompoundTag save(CompoundTag compound) {
+    public void saveAdditional(CompoundTag compound) {
         inventory.ifPresent(h -> compound.put("inv", h.serializeNBT()));
         energy.ifPresent(h -> compound.put("energy", h.serializeNBT()));
 
         compound.putInt("counter", counter);
         compound.putInt("maxburn", maxBurn);
-        return super.save(compound);
     }
 
     @Nonnull
@@ -204,7 +203,7 @@ public class ChargingStationTile extends BlockEntity implements MenuProvider {
     @Override
     public ClientboundBlockEntityDataPacket getUpdatePacket() {
         // Vanilla uses the type parameter to indicate which type of tile entity (command block, skull, or beacon?) is receiving the packet, but it seems like Forge has overridden this behavior
-        return new ClientboundBlockEntityDataPacket(worldPosition, 0, getUpdateTag());
+        return ClientboundBlockEntityDataPacket.create(this, entity -> this.getUpdateTag());
     }
 
     @Override

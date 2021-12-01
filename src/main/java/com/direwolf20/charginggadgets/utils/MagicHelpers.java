@@ -1,4 +1,4 @@
-package com.direwolf20.charginggadgets.common.utils;
+package com.direwolf20.charginggadgets.utils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

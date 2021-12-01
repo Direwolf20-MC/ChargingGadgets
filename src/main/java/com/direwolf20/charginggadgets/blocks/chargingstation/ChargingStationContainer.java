@@ -1,7 +1,6 @@
-package com.direwolf20.charginggadgets.common.container;
+package com.direwolf20.charginggadgets.blocks.chargingstation;
 
-import com.direwolf20.charginggadgets.common.blocks.ModBlocks;
-import com.direwolf20.charginggadgets.common.tiles.ChargingStationTile;
+import com.direwolf20.charginggadgets.blocks.BlockRegistry;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -36,7 +35,7 @@ public class ChargingStationContainer extends AbstractContainerMenu {
     }
 
     public ChargingStationContainer(@Nullable ChargingStationTile tile, ContainerData chargingStationData, int windowId, Inventory playerInventory, ItemStackHandler handler) {
-        super(ModBlocks.CHARGING_STATION_CONTAINER.get(), windowId);
+        super(BlockRegistry.CHARGING_STATION_CONTAINER.get(), windowId);
 
         this.handler = handler;
         this.tile = tile;
