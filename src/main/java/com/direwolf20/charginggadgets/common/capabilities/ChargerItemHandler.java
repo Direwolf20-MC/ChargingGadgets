@@ -1,9 +1,9 @@
 package com.direwolf20.charginggadgets.common.capabilities;
 
 import com.direwolf20.charginggadgets.common.tiles.ChargingStationTile;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.util.NonNullList;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.items.ItemStackHandler;
@@ -20,7 +20,7 @@ public class ChargerItemHandler extends ItemStackHandler {
 
     @Override
     protected void onContentsChanged(int slot) {
-        chargingStationTile.markDirty();
+        chargingStationTile.setChanged();
     }
 
     @Nonnull
@@ -29,7 +29,7 @@ public class ChargerItemHandler extends ItemStackHandler {
         if (slot == ChargingStationTile.Slots.FUEL.getId() && stack.getItem() == Items.BUCKET)
             return super.insertItem(slot, stack, simulate);
 
-        if (slot == ChargingStationTile.Slots.FUEL.getId() && ForgeHooks.getBurnTime(stack) <= 0)
+        if (slot == ChargingStationTile.Slots.FUEL.getId() && ForgeHooks.getBurnTime(stack, RecipeType.SMELTING) <= 0)
             return stack;
 
         if (slot == ChargingStationTile.Slots.CHARGE.getId() && (! stack.getCapability(CapabilityEnergy.ENERGY).isPresent() || getStackInSlot(slot).getCount() > 0))

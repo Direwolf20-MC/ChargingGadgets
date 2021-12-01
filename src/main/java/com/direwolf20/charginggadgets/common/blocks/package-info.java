@@ -1,6 +1,4 @@
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 package com.direwolf20.charginggadgets.common.blocks;
 
-import mcp.MethodsReturnNonnullByDefault;
 import javax.annotation.ParametersAreNonnullByDefault;

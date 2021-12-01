@@ -5,29 +5,30 @@ import com.direwolf20.charginggadgets.common.blocks.ModBlocks;
 import com.direwolf20.charginggadgets.common.capabilities.ChargerEnergyStorage;
 import com.direwolf20.charginggadgets.common.capabilities.ChargerItemHandler;
 import com.direwolf20.charginggadgets.common.container.ChargingStationContainer;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.INamedContainerProvider;
-import net.minecraft.item.BucketItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.network.play.server.SUpdateTileEntityPacket;
-import net.minecraft.tileentity.ITickableTileEntity;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.IIntArray;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.item.BucketItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.core.Direction;
+import net.minecraft.world.inventory.ContainerData;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.energy.CapabilityEnergy;
-import net.minecraftforge.energy.EnergyStorage;
 import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
@@ -36,7 +37,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 // Todo: completely rewrite this class from the ground up
-public class ChargingStationTile extends TileEntity implements ITickableTileEntity, INamedContainerProvider {
+public class ChargingStationTile extends BlockEntity implements MenuProvider {
     public enum Slots {
         FUEL(0),
         CHARGE(1);
@@ -60,21 +61,16 @@ public class ChargingStationTile extends TileEntity implements ITickableTileEnti
     private LazyOptional<ItemStackHandler> inventory  = LazyOptional.of(() -> new ChargerItemHandler(this));
 
     // Handles tracking changes, kinda messy but apparently this is how the cool kids do it these days
-    public final IIntArray chargingStationData = new IIntArray() {
+    public final ContainerData chargingStationData = new ContainerData() {
         @Override
         public int get(int index) {
-            switch (index) {
-                case 0:
-                    return ChargingStationTile.this.energyStorage.getEnergyStored() / 32;
-                case 1:
-                    return ChargingStationTile.this.energyStorage.getMaxEnergyStored() / 32;
-                case 2:
-                    return ChargingStationTile.this.counter;
-                case 3:
-                    return ChargingStationTile.this.maxBurn;
-                default:
-                    throw new IllegalArgumentException("Invalid index: " + index);
-            }
+            return switch (index) {
+                case 0 -> ChargingStationTile.this.energyStorage.getEnergyStored() / 32;
+                case 1 -> ChargingStationTile.this.energyStorage.getMaxEnergyStored() / 32;
+                case 2 -> ChargingStationTile.this.counter;
+                case 3 -> ChargingStationTile.this.maxBurn;
+                default -> throw new IllegalArgumentException("Invalid index: " + index);
+            };
         }
 
         @Override
@@ -83,37 +79,36 @@ public class ChargingStationTile extends TileEntity implements ITickableTileEnti
         }
 
         @Override
-        public int size() {
+        public int getCount() {
             return 4;
         }
     };
 
-    public ChargingStationTile() {
-        super(ModBlocks.CHARGING_STATION_TILE.get());
+    public ChargingStationTile(BlockPos pos, BlockState state) {
+        super(ModBlocks.CHARGING_STATION_TILE.get(), pos, state);
         this.energyStorage = new ChargerEnergyStorage(this, 0, Config.GENERAL.chargerMaxPower.get());
         this.energy = LazyOptional.of(() -> this.energyStorage);
     }
 
     @Nullable
     @Override
-    public Container createMenu(int i, PlayerInventory playerInventory, PlayerEntity playerEntity) {
-        assert world != null;
+    public AbstractContainerMenu createMenu(int i, Inventory playerInventory, Player playerEntity) {
+        assert level != null;
         return new ChargingStationContainer(this, this.chargingStationData, i, playerInventory, this.inventory.orElse(new ItemStackHandler(2)));
     }
 
-    @Override
-    public void tick() {
-        if (getWorld() == null)
-            return;
+    public static <T extends BlockEntity> void ticker(Level level, BlockPos blockPos, BlockState state, T t) {
+        if (t instanceof ChargingStationTile entity) {
+            entity.inventory.ifPresent(handler -> {
+                entity.tryBurn();
 
-        inventory.ifPresent(handler -> {
-            tryBurn();
-
-            ItemStack stack = handler.getStackInSlot(Slots.CHARGE.id);
-            if (!stack.isEmpty())
-                chargeItem(stack);
-        });
+                ItemStack stack = handler.getStackInSlot(Slots.CHARGE.id);
+                if (!stack.isEmpty())
+                    entity.chargeItem(stack);
+            });
+        }
     }
+
 
     private void chargeItem(ItemStack stack) {
         this.getCapability(CapabilityEnergy.ENERGY).ifPresent(energyStorage -> stack.getCapability(CapabilityEnergy.ENERGY).ifPresent(itemEnergy -> {
@@ -130,7 +125,7 @@ public class ChargingStationTile extends TileEntity implements ITickableTileEnti
     }
 
     private void tryBurn() {
-        if( world == null )
+        if (level == null)
             return;
 
         this.getCapability(CapabilityEnergy.ENERGY).ifPresent(energyStorage -> {
@@ -159,14 +154,14 @@ public class ChargingStationTile extends TileEntity implements ITickableTileEnti
         ItemStackHandler handler = inventory.orElseThrow(RuntimeException::new);
         ItemStack stack = handler.getStackInSlot(Slots.FUEL.id);
 
-        int burnTime = ForgeHooks.getBurnTime(stack);
+        int burnTime = ForgeHooks.getBurnTime(stack, RecipeType.SMELTING);
         if (burnTime > 0) {
             Item fuelStack = handler.getStackInSlot(Slots.FUEL.id).getItem();
             handler.extractItem(0, 1, false);
             if( fuelStack instanceof BucketItem && fuelStack != Items.BUCKET )
                 handler.insertItem(0, new ItemStack(Items.BUCKET, 1), false);
 
-            markDirty();
+            setChanged();
             counter = (int) Math.floor(burnTime) / 50;
             maxBurn = counter;
             return true;
@@ -175,8 +170,8 @@ public class ChargingStationTile extends TileEntity implements ITickableTileEnti
     }
 
     @Override
-    public void read(BlockState stateIn, CompoundNBT compound) {
-        super.read(stateIn, compound);
+    public void load(CompoundTag compound) {
+        super.load(compound);
 
         inventory.ifPresent(h -> h.deserializeNBT(compound.getCompound("inv")));
         energy.ifPresent(h -> h.deserializeNBT(compound.getCompound("energy")));
@@ -185,13 +180,13 @@ public class ChargingStationTile extends TileEntity implements ITickableTileEnti
     }
 
     @Override
-    public CompoundNBT write(CompoundNBT compound) {
-        inventory.ifPresent(h ->  compound.put("inv", h.serializeNBT()));
+    public CompoundTag save(CompoundTag compound) {
+        inventory.ifPresent(h -> compound.put("inv", h.serializeNBT()));
         energy.ifPresent(h -> compound.put("energy", h.serializeNBT()));
 
         compound.putInt("counter", counter);
         compound.putInt("maxburn", maxBurn);
-        return super.write(compound);
+        return super.save(compound);
     }
 
     @Nonnull
@@ -207,35 +202,36 @@ public class ChargingStationTile extends TileEntity implements ITickableTileEnti
     }
 
     @Override
-    public SUpdateTileEntityPacket getUpdatePacket() {
+    public ClientboundBlockEntityDataPacket getUpdatePacket() {
         // Vanilla uses the type parameter to indicate which type of tile entity (command block, skull, or beacon?) is receiving the packet, but it seems like Forge has overridden this behavior
-        return new SUpdateTileEntityPacket(pos, 0, getUpdateTag());
+        return new ClientboundBlockEntityDataPacket(worldPosition, 0, getUpdateTag());
     }
 
     @Override
-    public CompoundNBT getUpdateTag() {
-        return write(new CompoundNBT());
+    public CompoundTag getUpdateTag() {
+        return save(new CompoundTag());
+    }
+
+
+    @Override
+    public void handleUpdateTag(CompoundTag tag) {
+        load(tag);
     }
 
     @Override
-    public void handleUpdateTag(BlockState stateIn, CompoundNBT tag) {
-        read(stateIn, tag);
+    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
+        load(pkt.getTag());
     }
 
     @Override
-    public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
-        read(this.getBlockState(), pkt.getNbtCompound());
-    }
-
-    @Override
-    public void remove() {
+    public void setRemoved() {
         energy.invalidate();
         inventory.invalidate();
-        super.remove();
+        super.setRemoved();
     }
 
     @Override
-    public ITextComponent getDisplayName() {
-        return new StringTextComponent("Charging Station Tile");
+    public Component getDisplayName() {
+        return new TextComponent("Charging Station Tile");
     }
 }
