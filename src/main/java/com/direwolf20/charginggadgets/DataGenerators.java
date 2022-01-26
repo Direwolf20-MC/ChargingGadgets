@@ -9,7 +9,9 @@ import net.minecraft.data.loot.LootTableProvider;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
+import net.minecraft.data.tags.BlockTagsProvider;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
@@ -31,6 +33,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -49,6 +52,7 @@ public final class DataGenerators {
         }
 
         if (event.includeClient()) {
+            generator.addProvider(new GeneratorBlockTags(generator, event.getExistingFileHelper()));
             generator.addProvider(new GeneratorLanguage(generator));
             generator.addProvider(new GeneratorBlockStates(generator, event.getExistingFileHelper()));
             generator.addProvider(new GeneratorItemModels(generator, event.getExistingFileHelper()));
@@ -159,6 +163,18 @@ public final class DataGenerators {
                     .pattern("ili")
                     .unlockedBy("has_diamonds", has(Tags.Items.GEMS_DIAMOND))
                     .save(consumer);
+        }
+    }
+
+    static class GeneratorBlockTags extends BlockTagsProvider {
+        public GeneratorBlockTags(DataGenerator generator, @Nullable ExistingFileHelper existingFileHelper) {
+            super(generator, ChargingGadgets.MOD_ID, existingFileHelper);
+        }
+
+        @Override
+        protected void addTags() {
+            tag(BlockTags.createOptional(BlockRegistry.CHARGING_STATION.get().getRegistryName()))
+                    .addTags(BlockTags.MINEABLE_WITH_PICKAXE);
         }
     }
 }
