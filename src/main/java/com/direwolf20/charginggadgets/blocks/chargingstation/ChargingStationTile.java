@@ -208,7 +208,9 @@ public class ChargingStationTile extends BlockEntity implements MenuProvider {
 
     @Override
     public CompoundTag getUpdateTag() {
-        return save(new CompoundTag());
+        CompoundTag compoundTag = new CompoundTag();
+        saveAdditional(compoundTag);
+        return compoundTag;
     }
 
 
