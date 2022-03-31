@@ -173,8 +173,7 @@ public final class DataGenerators {
 
         @Override
         protected void addTags() {
-            tag(BlockTags.createOptional(BlockRegistry.CHARGING_STATION.get().getRegistryName()))
-                    .addTags(BlockTags.MINEABLE_WITH_PICKAXE);
+            tag(BlockTags.MINEABLE_WITH_PICKAXE).add(BlockRegistry.CHARGING_STATION.get());
         }
     }
 }
