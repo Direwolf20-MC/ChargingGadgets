@@ -2,16 +2,15 @@ package com.direwolf20.charginggadgets.blocks.chargingstation;
 
 import com.direwolf20.charginggadgets.ChargingGadgets;
 import com.direwolf20.charginggadgets.utils.MagicHelpers;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.network.chat.Component;
 import net.minecraft.locale.Language;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Inventory;
 
 import java.awt.*;
 import java.util.Arrays;
@@ -34,10 +33,10 @@ public class ChargingStationScreen extends AbstractContainerScreen<ChargingStati
         this.renderTooltip(stack, mouseX, mouseY); // @mcp: renderTooltip = renderHoveredToolTip
         if (mouseX > (leftPos + 7) && mouseX < (leftPos + 7) + 18 && mouseY > (topPos + 7) && mouseY < (topPos + 7) + 73)
             this.renderTooltip(stack, Language.getInstance().getVisualOrder(Arrays.asList(
-                    new TranslatableComponent("screen.charginggadgets.energy", MagicHelpers.withSuffix(this.container.getEnergy()), MagicHelpers.withSuffix(this.container.getMaxPower())),
+                    Component.translatable("screen.charginggadgets.energy", MagicHelpers.withSuffix(this.container.getEnergy()), MagicHelpers.withSuffix(this.container.getMaxPower())),
                     this.container.getRemaining() <= 0 ?
-                            new TranslatableComponent("screen.charginggadgets.no_fuel") :
-                            new TranslatableComponent("screen.charginggadgets.burn_time", MagicHelpers.ticksInSeconds(this.container.getRemaining()))
+                            Component.translatable("screen.charginggadgets.no_fuel") :
+                            Component.translatable("screen.charginggadgets.burn_time", MagicHelpers.ticksInSeconds(this.container.getRemaining()))
             )), mouseX, mouseY);
     }
 

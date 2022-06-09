@@ -3,6 +3,7 @@ package com.direwolf20.charginggadgets;
 import com.direwolf20.charginggadgets.blocks.BlockRegistry;
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
+import net.minecraft.core.Registry;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.loot.BlockLoot;
 import net.minecraft.data.loot.LootTableProvider;
@@ -47,15 +48,15 @@ public final class DataGenerators {
         DataGenerator generator = event.getGenerator();
 
         if (event.includeServer()) {
-            generator.addProvider(new GeneratorRecipes(generator));
-            generator.addProvider(new GeneratorLoots(generator));
+            generator.addProvider(event.includeServer(), new GeneratorRecipes(generator));
+            generator.addProvider(event.includeServer(), new GeneratorLoots(generator));
         }
 
         if (event.includeClient()) {
-            generator.addProvider(new GeneratorBlockTags(generator, event.getExistingFileHelper()));
-            generator.addProvider(new GeneratorLanguage(generator));
-            generator.addProvider(new GeneratorBlockStates(generator, event.getExistingFileHelper()));
-            generator.addProvider(new GeneratorItemModels(generator, event.getExistingFileHelper()));
+            generator.addProvider(event.includeServer(), new GeneratorBlockTags(generator, event.getExistingFileHelper()));
+            generator.addProvider(event.includeServer(), new GeneratorLanguage(generator));
+            generator.addProvider(event.includeServer(), new GeneratorBlockStates(generator, event.getExistingFileHelper()));
+            generator.addProvider(event.includeServer(), new GeneratorItemModels(generator, event.getExistingFileHelper()));
         }
     }
 
@@ -67,7 +68,7 @@ public final class DataGenerators {
         @Override
         protected void registerStatesAndModels() {
             horizontalBlock(BlockRegistry.CHARGING_STATION.get(), models().orientableWithBottom(
-                    BlockRegistry.CHARGING_STATION.get().getRegistryName().getPath(),
+                    Registry.BLOCK.getKey(BlockRegistry.CHARGING_STATION.get()).getPath(),
                     modLoc("blocks/charging_station_side"),
                     modLoc("blocks/charging_station_fronton"),
                     modLoc("blocks/charging_station_bottom"),
@@ -83,7 +84,7 @@ public final class DataGenerators {
 
         @Override
         protected void registerModels() {
-            String path = BlockRegistry.CHARGING_STATION.get().getRegistryName().getPath();
+            String path = Registry.BLOCK.getKey(BlockRegistry.CHARGING_STATION.get()).getPath();
             getBuilder(path).parent(new ModelFile.UncheckedModelFile(modLoc("block/" + path)));
         }
 
@@ -123,7 +124,7 @@ public final class DataGenerators {
             @Override
             protected void addTables() {
                 LootPool.Builder builder = LootPool.lootPool()
-                        .name(BlockRegistry.CHARGING_STATION.get().getRegistryName().toString())
+                        .name(Registry.BLOCK.getKey(BlockRegistry.CHARGING_STATION.get()).toString())
                         .setRolls(ConstantValue.exactly(1))
                         .when(ExplosionCondition.survivesExplosion())
                         .add(LootItem.lootTableItem(BlockRegistry.CHARGING_STATION.get())

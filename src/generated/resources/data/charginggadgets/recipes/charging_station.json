@@ -1,24 +1,24 @@
 {
   "type": "minecraft:crafting_shaped",
+  "key": {
+    "d": {
+      "tag": "forge:gems/lapis"
+    },
+    "i": {
+      "tag": "forge:ingots/iron"
+    },
+    "l": {
+      "tag": "forge:storage_blocks/coal"
+    },
+    "r": {
+      "tag": "forge:dusts/redstone"
+    }
+  },
   "pattern": [
     "iri",
     "drd",
     "ili"
   ],
-  "key": {
-    "i": {
-      "tag": "forge:ingots/iron"
-    },
-    "r": {
-      "tag": "forge:dusts/redstone"
-    },
-    "l": {
-      "tag": "forge:storage_blocks/coal"
-    },
-    "d": {
-      "tag": "forge:gems/lapis"
-    }
-  },
   "result": {
     "item": "charginggadgets:charging_station"
   }
