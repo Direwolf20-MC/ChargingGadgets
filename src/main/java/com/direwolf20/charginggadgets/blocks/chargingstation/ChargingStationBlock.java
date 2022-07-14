@@ -105,7 +105,7 @@ public class ChargingStationBlock extends Block implements EntityBlock {
         if (!(te instanceof ChargingStationTile))
             return InteractionResult.FAIL;
 
-        NetworkHooks.openGui((ServerPlayer) player, (MenuProvider) te, pos);
+        NetworkHooks.openScreen((ServerPlayer) player, (MenuProvider) te, pos);
         return InteractionResult.SUCCESS;
     }
 
