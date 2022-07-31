@@ -1,16 +1,13 @@
-buildscript {
-    repositories {
-        maven { url = 'https://files.minecraftforge.net/maven' }
-        mavenCentral()
-    }
-    dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.+', changing: true
-    }
+plugins {
+    id 'eclipse'
+    id 'maven-publish'
+    id 'net.minecraftforge.gradle' version '5.1.+'
 }
 
-apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'eclipse'
-apply plugin: 'maven-publish'
+apply {
+    // "Simple" fix for M1 (Apple Silicon) macs in the dev environment... All thanks to @mezz
+    from "https://raw.githubusercontent.com/mezz/JustEnoughItems/1.18/Forge/buildtools/AppleSiliconSupport.gradle"
+}
 
 version = "${mod_version}"
 group = 'com.direwolf20.charginggadgets'
@@ -90,8 +87,8 @@ dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
     //JEI
-    compileOnly fg.deobf("mezz.jei:jei-${jei_version}:api")
-    runtimeOnly fg.deobf("mezz.jei:jei-${jei_version}")
+//    compileOnly fg.deobf("mezz.jei:jei-${jei_version}:api")
+//    runtimeOnly fg.deobf("mezz.jei:jei-${jei_version}")
 
 //    runtimeOnly fg.deobf("ignored:buildinggadgets:3.3.2")
 //    runtimeOnly fg.deobf("ignored:mininggadgets:1.4.0")
@@ -125,4 +122,8 @@ publishing {
             url "file:///${project.projectDir}/mcmodsrepo"
         }
     }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
 }
