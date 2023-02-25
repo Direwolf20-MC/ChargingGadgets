@@ -25,6 +25,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
@@ -109,7 +110,7 @@ public class ChargingStationTile extends BlockEntity implements MenuProvider {
 
 
     private void chargeItem(ItemStack stack) {
-        this.getCapability(CapabilityEnergy.ENERGY).ifPresent(energyStorage -> stack.getCapability(CapabilityEnergy.ENERGY).ifPresent(itemEnergy -> {
+        this.getCapability(ForgeCapabilities.ENERGY).ifPresent(energyStorage -> stack.getCapability(CapabilityEnergy.ENERGY).ifPresent(itemEnergy -> {
             if (!isChargingItem(itemEnergy))
                 return;
 
@@ -126,7 +127,7 @@ public class ChargingStationTile extends BlockEntity implements MenuProvider {
         if (level == null)
             return;
 
-        this.getCapability(CapabilityEnergy.ENERGY).ifPresent(energyStorage -> {
+        this.getCapability(ForgeCapabilities.ENERGY).ifPresent(energyStorage -> {
             boolean canInsertEnergy = energyStorage.receiveEnergy(625, true) > 0;
             if (counter > 0 && canInsertEnergy) {
                 burn(energyStorage);
@@ -189,10 +190,10 @@ public class ChargingStationTile extends BlockEntity implements MenuProvider {
     @Nonnull
     @Override
     public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, final @Nullable Direction side) {
-        if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
+        if (cap == ForgeCapabilities.ITEM_HANDLER)
             return inventory.cast();
 
-        if (cap == CapabilityEnergy.ENERGY)
+        if (cap == ForgeCapabilities.ENERGY)
             return energy.cast();
 
         return super.getCapability(cap, side);

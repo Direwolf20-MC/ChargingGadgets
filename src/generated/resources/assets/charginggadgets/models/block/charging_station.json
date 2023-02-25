@@ -1,9 +1,9 @@
 {
   "parent": "minecraft:block/orientable_with_bottom",
   "textures": {
-    "bottom": "charginggadgets:blocks/charging_station_bottom",
-    "front": "charginggadgets:blocks/charging_station_fronton",
-    "side": "charginggadgets:blocks/charging_station_side",
-    "top": "charginggadgets:blocks/charging_station_top"
+    "bottom": "charginggadgets:block/charging_station_bottom",
+    "front": "charginggadgets:block/charging_station_fronton",
+    "side": "charginggadgets:block/charging_station_side",
+    "top": "charginggadgets:block/charging_station_top"
   }
 }

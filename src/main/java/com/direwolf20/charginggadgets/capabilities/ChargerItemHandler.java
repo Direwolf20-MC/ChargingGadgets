@@ -5,6 +5,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.items.ItemStackHandler;
 
@@ -32,7 +33,7 @@ public class ChargerItemHandler extends ItemStackHandler {
         if (slot == ChargingStationTile.Slots.FUEL.getId() && ForgeHooks.getBurnTime(stack, RecipeType.SMELTING) <= 0)
             return stack;
 
-        if (slot == ChargingStationTile.Slots.CHARGE.getId() && (! stack.getCapability(CapabilityEnergy.ENERGY).isPresent() || getStackInSlot(slot).getCount() > 0))
+        if (slot == ChargingStationTile.Slots.CHARGE.getId() && (! stack.getCapability(ForgeCapabilities.ENERGY).isPresent() || getStackInSlot(slot).getCount() > 0))
             return stack;
 
         return super.insertItem(slot, stack, simulate);
