@@ -5,6 +5,7 @@ import com.direwolf20.charginggadgets.utils.MagicHelpers;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.locale.Language;
@@ -26,13 +27,13 @@ public class ChargingStationScreen extends AbstractContainerScreen<ChargingStati
     }
 
     @Override
-    public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
-        this.renderBackground(stack);
-        super.render(stack, mouseX, mouseY, partialTicks);
+    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+        this.renderBackground(guiGraphics);
+        super.render(guiGraphics, mouseX, mouseY, partialTicks);
 
-        this.renderTooltip(stack, mouseX, mouseY); // @mcp: renderTooltip = renderHoveredToolTip
+        this.renderTooltip(guiGraphics, mouseX, mouseY); // @mcp: renderTooltip = renderHoveredToolTip
         if (mouseX > (leftPos + 7) && mouseX < (leftPos + 7) + 18 && mouseY > (topPos + 7) && mouseY < (topPos + 7) + 73)
-            this.renderTooltip(stack, Language.getInstance().getVisualOrder(Arrays.asList(
+            guiGraphics.renderTooltip(font, Language.getInstance().getVisualOrder(Arrays.asList(
                     Component.translatable("screen.charginggadgets.energy", MagicHelpers.withSuffix(this.container.getEnergy()), MagicHelpers.withSuffix(this.container.getMaxPower())),
                     this.container.getRemaining() <= 0 ?
                             Component.translatable("screen.charginggadgets.no_fuel") :
@@ -46,27 +47,26 @@ public class ChargingStationScreen extends AbstractContainerScreen<ChargingStati
     }
 
     @Override
-    protected void renderBg(PoseStack stack, float partialTicks, int mouseX, int mouseY) {
+    protected void renderBg(GuiGraphics guiGraphics, float partialTicks, int mouseX, int mouseY) {
         RenderSystem.setShaderColor(1, 1, 1, 1);
-        RenderSystem.setShaderTexture(0, background);
-        this.blit(stack, leftPos, topPos, 0, 0, imageWidth, imageHeight);
+        guiGraphics.blit(background, leftPos, topPos, 0, 0, imageWidth, imageHeight);
 
         int maxHeight = 13;
         if (this.container.getMaxBurn() > 0) {
             int remaining = (this.container.getRemaining() * maxHeight) / this.container.getMaxBurn();
-            this.blit(stack, leftPos + 66, topPos + 26 + 13 - remaining, 176, 13 - remaining, 14, remaining + 1);
+            guiGraphics.blit(background, leftPos + 66, topPos + 26 + 13 - remaining, 176, 13 - remaining, 14, remaining + 1);
         }
 
         int maxEnergy = this.container.getMaxPower(), height = 70;
         if (maxEnergy > 0) {
             int remaining = (this.container.getEnergy() * height) / maxEnergy;
-            this.blit(stack, leftPos + 8, topPos + 78 - remaining, 176, 84 - remaining, 16, remaining + 1);
+            guiGraphics.blit(background, leftPos + 8, topPos + 78 - remaining, 176, 84 - remaining, 16, remaining + 1);
         }
     }
 
     @Override
-    protected void renderLabels(PoseStack stack, int mouseX, int mouseY) {
-        Minecraft.getInstance().font.draw(stack, I18n.get("block.charginggadgets.charging_station"), 55, 8, Color.DARK_GRAY.getRGB());
+    protected void renderLabels(GuiGraphics guiGraphics, int mouseX, int mouseY) {
+        guiGraphics.drawString(font, I18n.get("block.charginggadgets.charging_station"), 55, 8, Color.DARK_GRAY.getRGB(), false);
     }
 }
 

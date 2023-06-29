@@ -14,7 +14,6 @@ import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 import net.minecraftforge.items.SlotItemHandler;
@@ -32,7 +31,7 @@ public class ChargingStationContainer extends AbstractContainerMenu {
     private ChargingStationTile tile;
 
     public ChargingStationContainer(int windowId, Inventory playerInventory, FriendlyByteBuf extraData) {
-        this((ChargingStationTile) playerInventory.player.level.getBlockEntity(extraData.readBlockPos()), new SimpleContainerData(4), windowId, playerInventory, new ItemStackHandler(2));
+        this((ChargingStationTile) playerInventory.player.level().getBlockEntity(extraData.readBlockPos()), new SimpleContainerData(4), windowId, playerInventory, new ItemStackHandler(2));
     }
 
     public ChargingStationContainer(@Nullable ChargingStationTile tile, ContainerData chargingStationData, int windowId, Inventory playerInventory, ItemStackHandler handler) {
