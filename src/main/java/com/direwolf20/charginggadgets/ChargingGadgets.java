@@ -3,11 +3,13 @@ package com.direwolf20.charginggadgets;
 import com.direwolf20.charginggadgets.blocks.BlockRegistry;
 import com.direwolf20.charginggadgets.blocks.chargingstation.ChargingStationScreen;
 import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.CreativeModeTabEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
@@ -15,6 +17,7 @@ import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.registries.RegisterEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -48,12 +51,17 @@ public class ChargingGadgets
         MenuScreens.register(BlockRegistry.CHARGING_STATION_CONTAINER.get(), ChargingStationScreen::new);
     }
 
-    private void setupCreativeTabs(final CreativeModeTabEvent.Register event) {
-        event.registerCreativeModeTab(new ResourceLocation(MOD_ID, MOD_ID), builder -> builder.title(Component.translatable("itemGroup." + MOD_ID))
-                .icon(() -> new ItemStack(BlockRegistry.CHARGING_STATION_BI.get()))
-                .displayItems((enabledFlags, populator, hasPermissions) -> {
-                    populator.accept(BlockRegistry.CHARGING_STATION_BI.get());
-                })
-                .build());
+    private void setupCreativeTabs(final RegisterEvent event) {
+        ResourceKey<CreativeModeTab> TAB = ResourceKey.create(Registries.CREATIVE_MODE_TAB, new ResourceLocation(MOD_ID, "creative_tab"));
+        event.register(Registries.CREATIVE_MODE_TAB, creativeModeTabRegisterHelper ->
+        {
+            creativeModeTabRegisterHelper.register(TAB, CreativeModeTab.builder().icon(() -> new ItemStack(BlockRegistry.CHARGING_STATION_BI.get()))
+                    .title(Component.translatable("itemGroup." + MOD_ID))
+                    .displayItems((params, output) -> {
+                        output.accept(BlockRegistry.CHARGING_STATION_BI.get());
+                    })
+                    .build());
+        });
+
     }
 }

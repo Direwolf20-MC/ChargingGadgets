@@ -27,9 +27,7 @@ import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
-import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
 import javax.annotation.Nonnull;
@@ -110,7 +108,7 @@ public class ChargingStationTile extends BlockEntity implements MenuProvider {
 
 
     private void chargeItem(ItemStack stack) {
-        this.getCapability(ForgeCapabilities.ENERGY).ifPresent(energyStorage -> stack.getCapability(CapabilityEnergy.ENERGY).ifPresent(itemEnergy -> {
+        this.getCapability(ForgeCapabilities.ENERGY).ifPresent(energyStorage -> stack.getCapability(ForgeCapabilities.ENERGY).ifPresent(itemEnergy -> {
             if (!isChargingItem(itemEnergy))
                 return;
 
