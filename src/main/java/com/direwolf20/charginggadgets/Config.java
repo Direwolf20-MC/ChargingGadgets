@@ -1,15 +1,16 @@
 package com.direwolf20.charginggadgets;
 
-import net.minecraftforge.common.ForgeConfigSpec;
+
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 public class Config {
-    private static final ForgeConfigSpec.Builder SERVER_BUILDER = new ForgeConfigSpec.Builder();
+    private static final ModConfigSpec.Builder SERVER_BUILDER = new ModConfigSpec.Builder();
     public static final CategoryGeneral GENERAL = new CategoryGeneral();
 
-    public static ForgeConfigSpec SERVER_CONFIG;
+    public static ModConfigSpec SERVER_CONFIG;
 
     public static final class CategoryGeneral {
-        public final ForgeConfigSpec.IntValue chargerMaxPower;
+        public final ModConfigSpec.IntValue chargerMaxPower;
 
         private CategoryGeneral() {
             SERVER_BUILDER.comment("General settings").push("general");

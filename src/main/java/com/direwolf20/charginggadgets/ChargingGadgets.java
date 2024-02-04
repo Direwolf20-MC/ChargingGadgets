@@ -2,6 +2,7 @@ package com.direwolf20.charginggadgets;
 
 import com.direwolf20.charginggadgets.blocks.BlockRegistry;
 import com.direwolf20.charginggadgets.blocks.chargingstation.ChargingStationScreen;
+import com.direwolf20.charginggadgets.blocks.chargingstation.ChargingStationTile;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -9,37 +10,37 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.registries.RegisterEvent;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+import net.neoforged.neoforge.registries.RegisterEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 @Mod(ChargingGadgets.MOD_ID)
-public class ChargingGadgets
-{
+public class ChargingGadgets {
     public static final String MOD_ID = "charginggadgets";
     private static final Logger LOGGER = LogManager.getLogger();
 
-    public ChargingGadgets() {
-        IEventBus event = FMLJavaModLoadingContext.get().getModEventBus();
+    public ChargingGadgets(IEventBus eventBus) {
+        //IEventBus event = FMLJavaModLoadingContext.get().getModEventBus();
 
-        BlockRegistry.ITEMS.register(event);
-        BlockRegistry.BLOCKS.register(event);
-        BlockRegistry.TILES_ENTITIES.register(event);
-        BlockRegistry.CONTAINERS.register(event);
+        BlockRegistry.ITEMS.register(eventBus);
+        BlockRegistry.BLOCKS.register(eventBus);
+        BlockRegistry.TILES_ENTITIES.register(eventBus);
+        BlockRegistry.CONTAINERS.register(eventBus);
 
-        event.addListener(this::setup);
-        event.addListener(this::clientSetup);
-        event.addListener(this::setupCreativeTabs);
+        eventBus.addListener(this::setup);
+        eventBus.addListener(this::registerCapabilities);
+        eventBus.addListener(this::clientSetup);
+        eventBus.addListener(this::setupCreativeTabs);
 
-        MinecraftForge.EVENT_BUS.register(this);
+        //MinecraftForge.EVENT_BUS.register(this);
 
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, Config.SERVER_CONFIG);
     }
@@ -62,6 +63,16 @@ public class ChargingGadgets
                     })
                     .build());
         });
+    }
 
+    private void registerCapabilities(RegisterCapabilitiesEvent event) {
+        event.registerBlock(Capabilities.ItemHandler.BLOCK,
+                (level, pos, state, be, side) -> ((ChargingStationTile) be).inventory,
+                // blocks to register for
+                BlockRegistry.CHARGING_STATION.get());
+        event.registerBlock(Capabilities.EnergyStorage.BLOCK,
+                (level, pos, state, be, side) -> ((ChargingStationTile) be).energyStorage,
+                // blocks to register for
+                BlockRegistry.CHARGING_STATION.get());
     }
 }

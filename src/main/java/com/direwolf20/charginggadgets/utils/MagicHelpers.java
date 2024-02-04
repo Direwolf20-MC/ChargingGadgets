@@ -13,6 +13,7 @@ public class MagicHelpers {
     }
 
     private static final BigDecimal TWENTY = new BigDecimal(20);
+
     public static String ticksInSeconds(int ticks) {
         BigDecimal value = new BigDecimal(ticks);
         value = value.divide(TWENTY, 1, RoundingMode.HALF_UP);
