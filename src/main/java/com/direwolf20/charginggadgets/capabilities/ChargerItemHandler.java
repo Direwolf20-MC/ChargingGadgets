@@ -32,7 +32,7 @@ public class ChargerItemHandler extends ItemStackHandler {
         if (slot == ChargingStationTile.Slots.FUEL.getId() && CommonHooks.getBurnTime(stack, RecipeType.SMELTING) <= 0)
             return stack;
 
-        if (slot == ChargingStationTile.Slots.CHARGE.getId() && (!(stack.getCapability(Capabilities.EnergyStorage.ITEM) == null) || getStackInSlot(slot).getCount() > 0))
+        if (slot == ChargingStationTile.Slots.CHARGE.getId() && (stack.getCapability(Capabilities.EnergyStorage.ITEM) == null || getStackInSlot(slot).getCount() > 0))
             return stack;
 
         return super.insertItem(slot, stack, simulate);
