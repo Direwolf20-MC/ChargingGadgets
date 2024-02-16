@@ -1,22 +1,22 @@
 package com.direwolf20.charginggadgets.blocks.chargingstation;
 
 import com.direwolf20.charginggadgets.blocks.BlockRegistry;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.SimpleContainerData;
-import net.minecraft.core.BlockPos;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.ItemStackHandler;
-import net.minecraftforge.items.SlotItemHandler;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.common.CommonHooks;
+import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.items.ItemStackHandler;
+import net.neoforged.neoforge.items.SlotItemHandler;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -57,8 +57,8 @@ public class ChargingStationContainer extends AbstractContainerMenu {
             addSlot(new Slot(inventory, row, x, y));
         }
         // Slots for the main inventory
-        for (int row = 1; row < 4; ++ row) {
-            for (int col = 0; col < 9; ++ col) {
+        for (int row = 1; row < 4; ++row) {
+            for (int col = 0; col < 9; ++col) {
                 int x = 8 + col * 18;
                 int y = row * 18 + (56 + 10);
                 addSlot(new Slot(inventory, col + row * 9, x, y));
@@ -123,10 +123,10 @@ public class ChargingStationContainer extends AbstractContainerMenu {
         @Override
         public boolean mayPlace(@Nonnull ItemStack stack) {
             if (getSlotIndex() == ChargingStationTile.Slots.CHARGE.getId())
-                return stack.getCapability(ForgeCapabilities.ENERGY).isPresent();
+                return stack.getCapability(Capabilities.EnergyStorage.ITEM) != null;
 
             if (getSlotIndex() == ChargingStationTile.Slots.FUEL.getId())
-                return ForgeHooks.getBurnTime(stack, RecipeType.SMELTING) != 0;
+                return CommonHooks.getBurnTime(stack, RecipeType.SMELTING) != 0;
 
             return super.mayPlace(stack);
         }

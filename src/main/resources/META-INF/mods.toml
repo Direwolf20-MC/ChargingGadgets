@@ -1,24 +1,31 @@
 modLoader="javafml"
-loaderVersion="[44,)"
+loaderVersion="${loader_version_range}"
 issueTrackerURL="https://github.com/Direwolf20-MC/ChargingGadgets/issues"
 license="MIT (https://github.com/Direwolf20-MC/ChargingGadgets/blob/master/LICENSE.md)"
 
 [[mods]]
-modId="charginggadgets"
-version="${file.jarVersion}"
-displayName="Charging Gadgets"
+modId="${mod_id}"
+version="${mod_version}"
+displayName="${mod_name}"
 updateJSONURL="https://raw.githubusercontent.com/Direwolf20-MC/ChargingGadgets/master/update.json"
 displayURL="https://github.com/Direwolf20-MC/ChargingGadgets"
 #logoFile="examplemod.png"
-credits="Direwolf20, ErrorMikey, Lex and the entire forge team."
+credits="Direwolf20, ErrorMikey, CPW and the entire neoforge team."
 authors="Direwolf20, ErrorMikey"
 description='''
     It's a gadget (or a block?) that charges things, what more could you ask for?
 '''
 
 [[dependencies.charginggadgets]]
-    modId="forge"
-    mandatory=true
-    versionRange="[44,)"
+    modId="neoforge"
+    type="required" #mandatory
+    versionRange="${neo_version_range}" #mandatory
+    ordering="NONE"
+    side="BOTH"
+[[dependencies.${mod_id}]]
+    modId="minecraft"
+    type="required"
+    # This version range declares a minimum of the current minecraft version up to but not including the next major version
+    versionRange="${minecraft_version_range}"
     ordering="NONE"
     side="BOTH"

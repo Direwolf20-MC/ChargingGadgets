@@ -5,7 +5,6 @@ import com.direwolf20.charginggadgets.blocks.BlockRegistry;
 import com.direwolf20.charginggadgets.capabilities.ChargerEnergyStorage;
 import com.direwolf20.charginggadgets.capabilities.ChargerItemHandler;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
@@ -23,14 +22,10 @@ import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.energy.IEnergyStorage;
-import net.minecraftforge.items.ItemStackHandler;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.common.CommonHooks;
+import net.neoforged.neoforge.energy.IEnergyStorage;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 // Todo: completely rewrite this class from the ground up
@@ -54,8 +49,7 @@ public class ChargingStationTile extends BlockEntity implements MenuProvider {
     private int maxBurn = 0;
 
     public ChargerEnergyStorage energyStorage;
-    private LazyOptional<ChargerEnergyStorage> energy;
-    private LazyOptional<ItemStackHandler> inventory  = LazyOptional.of(() -> new ChargerItemHandler(this));
+    public ChargerItemHandler inventory = new ChargerItemHandler(this);
 
     // Handles tracking changes, kinda messy but apparently this is how the cool kids do it these days
     public final ContainerData chargingStationData = new ContainerData() {
@@ -84,37 +78,34 @@ public class ChargingStationTile extends BlockEntity implements MenuProvider {
     public ChargingStationTile(BlockPos pos, BlockState state) {
         super(BlockRegistry.CHARGING_STATION_TILE.get(), pos, state);
         this.energyStorage = new ChargerEnergyStorage(this, 0, Config.GENERAL.chargerMaxPower.get());
-        this.energy = LazyOptional.of(() -> this.energyStorage);
     }
 
     @Nullable
     @Override
     public AbstractContainerMenu createMenu(int i, Inventory playerInventory, Player playerEntity) {
         assert level != null;
-        return new ChargingStationContainer(this, this.chargingStationData, i, playerInventory, this.inventory.orElse(new ItemStackHandler(2)));
+        return new ChargingStationContainer(this, this.chargingStationData, i, playerInventory, this.inventory);
     }
 
     public static <T extends BlockEntity> void ticker(Level level, BlockPos blockPos, BlockState state, T t) {
         if (t instanceof ChargingStationTile entity) {
-            entity.inventory.ifPresent(handler -> {
-                entity.tryBurn();
+            entity.tryBurn();
 
-                ItemStack stack = handler.getStackInSlot(Slots.CHARGE.id);
-                if (!stack.isEmpty())
-                    entity.chargeItem(stack);
-            });
+            ItemStack stack = entity.inventory.getStackInSlot(Slots.CHARGE.id);
+            if (!stack.isEmpty())
+                entity.chargeItem(stack);
         }
     }
 
 
     private void chargeItem(ItemStack stack) {
-        this.getCapability(ForgeCapabilities.ENERGY).ifPresent(energyStorage -> stack.getCapability(ForgeCapabilities.ENERGY).ifPresent(itemEnergy -> {
-            if (!isChargingItem(itemEnergy))
-                return;
+        IEnergyStorage energy = stack.getCapability(Capabilities.EnergyStorage.ITEM);
+        if (energy == null) return;
+        if (!isChargingItem(energy))
+            return;
 
-            int energyRemoved = itemEnergy.receiveEnergy(Math.min(energyStorage.getEnergyStored(), 2500), false);
-            ((ChargerEnergyStorage) energyStorage).consumeEnergy(energyRemoved, false);
-        }));
+        int energyRemoved = energy.receiveEnergy(Math.min(energyStorage.getEnergyStored(), 2500), false);
+        energyStorage.consumeEnergy(energyRemoved, false);
     }
 
     public boolean isChargingItem(IEnergyStorage energy) {
@@ -125,15 +116,13 @@ public class ChargingStationTile extends BlockEntity implements MenuProvider {
         if (level == null)
             return;
 
-        this.getCapability(ForgeCapabilities.ENERGY).ifPresent(energyStorage -> {
-            boolean canInsertEnergy = energyStorage.receiveEnergy(625, true) > 0;
-            if (counter > 0 && canInsertEnergy) {
+        boolean canInsertEnergy = energyStorage.receiveEnergy(625, true) > 0;
+        if (counter > 0 && canInsertEnergy) {
+            burn(energyStorage);
+        } else if (canInsertEnergy) {
+            if (initBurn())
                 burn(energyStorage);
-            } else if (canInsertEnergy) {
-                if (initBurn())
-                    burn(energyStorage);
-            }
-        });
+        }
     }
 
 
@@ -148,15 +137,14 @@ public class ChargingStationTile extends BlockEntity implements MenuProvider {
     }
 
     private boolean initBurn() {
-        ItemStackHandler handler = inventory.orElseThrow(RuntimeException::new);
-        ItemStack stack = handler.getStackInSlot(Slots.FUEL.id);
+        ItemStack stack = inventory.getStackInSlot(Slots.FUEL.id);
 
-        int burnTime = ForgeHooks.getBurnTime(stack, RecipeType.SMELTING);
+        int burnTime = CommonHooks.getBurnTime(stack, RecipeType.SMELTING);
         if (burnTime > 0) {
-            Item fuelStack = handler.getStackInSlot(Slots.FUEL.id).getItem();
-            handler.extractItem(0, 1, false);
-            if( fuelStack instanceof BucketItem && fuelStack != Items.BUCKET )
-                handler.insertItem(0, new ItemStack(Items.BUCKET, 1), false);
+            Item fuelStack = inventory.getStackInSlot(Slots.FUEL.id).getItem();
+            inventory.extractItem(0, 1, false);
+            if (fuelStack instanceof BucketItem && fuelStack != Items.BUCKET)
+                inventory.insertItem(0, new ItemStack(Items.BUCKET, 1), false);
 
             setChanged();
             counter = (int) Math.floor(burnTime) / 50;
@@ -170,31 +158,19 @@ public class ChargingStationTile extends BlockEntity implements MenuProvider {
     public void load(CompoundTag compound) {
         super.load(compound);
 
-        inventory.ifPresent(h -> h.deserializeNBT(compound.getCompound("inv")));
-        energy.ifPresent(h -> h.deserializeNBT(compound.getCompound("energy")));
+        inventory.deserializeNBT(compound.getCompound("inv"));
+        energyStorage.deserializeNBT(compound.getCompound("energy"));
         counter = compound.getInt("counter");
         maxBurn = compound.getInt("maxburn");
     }
 
     @Override
     public void saveAdditional(CompoundTag compound) {
-        inventory.ifPresent(h -> compound.put("inv", h.serializeNBT()));
-        energy.ifPresent(h -> compound.put("energy", h.serializeNBT()));
+        compound.put("inv", inventory.serializeNBT());
+        compound.put("energy", energyStorage.serializeNBT());
 
         compound.putInt("counter", counter);
         compound.putInt("maxburn", maxBurn);
-    }
-
-    @Nonnull
-    @Override
-    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, final @Nullable Direction side) {
-        if (cap == ForgeCapabilities.ITEM_HANDLER)
-            return inventory.cast();
-
-        if (cap == ForgeCapabilities.ENERGY)
-            return energy.cast();
-
-        return super.getCapability(cap, side);
     }
 
     @Override
@@ -223,8 +199,6 @@ public class ChargingStationTile extends BlockEntity implements MenuProvider {
 
     @Override
     public void setRemoved() {
-        energy.invalidate();
-        inventory.invalidate();
         super.setRemoved();
     }
 
