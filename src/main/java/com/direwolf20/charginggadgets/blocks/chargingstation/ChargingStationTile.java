@@ -14,10 +14,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
-import net.minecraft.world.item.BucketItem;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -141,10 +138,12 @@ public class ChargingStationTile extends BlockEntity implements MenuProvider {
 
         int burnTime = CommonHooks.getBurnTime(stack, RecipeType.SMELTING);
         if (burnTime > 0) {
-            Item fuelStack = inventory.getStackInSlot(Slots.FUEL.id).getItem();
-            inventory.extractItem(0, 1, false);
-            if (fuelStack instanceof BucketItem && fuelStack != Items.BUCKET)
-                inventory.insertItem(0, new ItemStack(Items.BUCKET, 1), false);
+            //Item fuelStack = inventory.getStackInSlot(Slots.FUEL.id).getItem();
+            ItemStack fuelStack = inventory.getStackInSlot(Slots.FUEL.id);
+            if (fuelStack.hasCraftingRemainingItem())
+                inventory.setStackInSlot(Slots.FUEL.id, fuelStack.getCraftingRemainingItem());
+            else
+                fuelStack.shrink(1);
 
             setChanged();
             counter = (int) Math.floor(burnTime) / 50;
