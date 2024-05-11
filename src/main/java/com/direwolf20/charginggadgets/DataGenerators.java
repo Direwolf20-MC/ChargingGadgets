@@ -1,27 +1,19 @@
 package com.direwolf20.charginggadgets;
 
 import com.direwolf20.charginggadgets.blocks.BlockRegistry;
-import com.google.common.collect.ImmutableList;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
-import net.minecraft.data.loot.BlockLootSubProvider;
 import net.minecraft.data.loot.LootTableProvider;
+import net.minecraft.data.loot.packs.VanillaBlockLoot;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.storage.loot.*;
-import net.minecraft.world.level.storage.loot.entries.LootItem;
-import net.minecraft.world.level.storage.loot.functions.CopyNameFunction;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
-import net.minecraft.world.level.storage.loot.predicates.ExplosionCondition;
-import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.model.generators.BlockStateProvider;
 import net.neoforged.neoforge.client.model.generators.ItemModelProvider;
 import net.neoforged.neoforge.client.model.generators.ModelFile;
@@ -30,14 +22,15 @@ import net.neoforged.neoforge.common.data.BlockTagsProvider;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import net.neoforged.neoforge.common.data.LanguageProvider;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
+import net.neoforged.neoforge.registries.DeferredHolder;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-@Mod.EventBusSubscriber(modid = ChargingGadgets.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = ChargingGadgets.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
 public final class DataGenerators {
     @SubscribeEvent
     public static void gatherData(GatherDataEvent event) {
@@ -46,15 +39,18 @@ public final class DataGenerators {
         var generator = event.getGenerator();
         var helper = event.getExistingFileHelper();
         var packOutput = event.getGenerator().getPackOutput();
+        CompletableFuture<HolderLookup.Provider> lookupProvider = event.getLookupProvider();
 
         // Client
         generator.addProvider(includeClient, new GeneratorLanguage(packOutput));
         generator.addProvider(includeClient, new GeneratorBlockStates(packOutput, event.getExistingFileHelper()));
-        generator.addProvider(includeClient, new GeneratorLoots(packOutput));
+
 
         // Server
-        generator.addProvider(includeServer, new GeneratorRecipes(packOutput));
-        generator.addProvider(includeServer, new GeneratorBlockTags(packOutput, event.getLookupProvider(), event.getExistingFileHelper()));
+        generator.addProvider(event.includeServer(), new LootTableProvider(packOutput, Collections.emptySet(),
+                List.of(new LootTableProvider.SubProviderEntry(GeneratorLoots::new, LootContextParamSets.BLOCK)), event.getLookupProvider()));
+        generator.addProvider(includeServer, new GeneratorRecipes(packOutput, lookupProvider));
+        generator.addProvider(includeServer, new GeneratorBlockTags(packOutput, lookupProvider, event.getExistingFileHelper()));
         generator.addProvider(includeServer, new GeneratorItemModels(packOutput, event.getExistingFileHelper()));
     }
 
@@ -108,45 +104,23 @@ public final class DataGenerators {
     }
 
 
-    static class GeneratorLoots extends LootTableProvider {
-        public GeneratorLoots(PackOutput output) {
-            super(output, Set.of(), ImmutableList.of(
-                    new SubProviderEntry(Blocks::new, LootContextParamSets.BLOCK)
-            ));
+    static class GeneratorLoots extends VanillaBlockLoot {
+        @Override
+        protected void generate() {
+            dropSelf(BlockRegistry.CHARGING_STATION.get());
         }
 
         @Override
-        protected void validate(Map<ResourceLocation, LootTable> map, ValidationContext validationContext) {
-            map.forEach((name, table) -> table.validate(validationContext.setParams(table.getParamSet()).enterElement("{" + name + "}", new LootDataId<>(LootDataType.TABLE, name))));
-        }
-
-        private static class Blocks extends BlockLootSubProvider {
-            protected Blocks() {
-                super(Set.of(), FeatureFlags.REGISTRY.allFlags());
-            }
-
-            @Override
-            protected void generate() {
-                LootPool.Builder builder = LootPool.lootPool()
-                        .name(BlockRegistry.CHARGING_STATION.getId().toString())
-                        .setRolls(ConstantValue.exactly(1))
-                        .when(ExplosionCondition.survivesExplosion())
-                        .add(LootItem.lootTableItem(BlockRegistry.CHARGING_STATION.get())
-                                .apply(CopyNameFunction.copyName(CopyNameFunction.NameSource.BLOCK_ENTITY)));
-
-                this.add(BlockRegistry.CHARGING_STATION.get(), LootTable.lootTable().withPool(builder));
-            }
-
-            @Override
-            protected Iterable<Block> getKnownBlocks() {
-                return Collections.singletonList(BlockRegistry.CHARGING_STATION.get());
-            }
+        protected Iterable<Block> getKnownBlocks() {
+            List<Block> knownBlocks = new ArrayList<>();
+            knownBlocks.addAll(BlockRegistry.BLOCKS.getEntries().stream().map(DeferredHolder::get).toList());
+            return knownBlocks;
         }
     }
 
     static class GeneratorRecipes extends RecipeProvider {
-        public GeneratorRecipes(PackOutput output) {
-            super(output);
+        public GeneratorRecipes(PackOutput output, CompletableFuture<HolderLookup.Provider> completableFuture) {
+            super(output, completableFuture);
         }
 
 

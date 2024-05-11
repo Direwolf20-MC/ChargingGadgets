@@ -11,17 +11,11 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "functions": [
-            {
-              "function": "minecraft:copy_name",
-              "source": "block_entity"
-            }
-          ],
           "name": "charginggadgets:charging_station"
         }
       ],
-      "name": "charginggadgets:charging_station",
       "rolls": 1.0
     }
-  ]
+  ],
+  "random_sequence": "charginggadgets:blocks/charging_station"
 }

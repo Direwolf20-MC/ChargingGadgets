@@ -5,7 +5,7 @@
       "conditions": {
         "items": [
           {
-            "tag": "forge:gems/diamond"
+            "items": "#c:gems/diamond"
           }
         ]
       },
@@ -20,8 +20,8 @@
   },
   "requirements": [
     [
-      "has_diamonds",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_diamonds"
     ]
   ],
   "rewards": {

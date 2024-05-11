@@ -13,7 +13,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.common.CommonHooks;
 import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.ItemStackHandler;
 import net.neoforged.neoforge.items.SlotItemHandler;
@@ -126,7 +125,7 @@ public class ChargingStationContainer extends AbstractContainerMenu {
                 return stack.getCapability(Capabilities.EnergyStorage.ITEM) != null;
 
             if (getSlotIndex() == ChargingStationTile.Slots.FUEL.getId())
-                return CommonHooks.getBurnTime(stack, RecipeType.SMELTING) != 0;
+                return stack.getBurnTime(RecipeType.SMELTING) != 0;
 
             return super.mayPlace(stack);
         }
