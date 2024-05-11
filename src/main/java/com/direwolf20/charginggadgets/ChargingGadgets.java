@@ -1,9 +1,7 @@
 package com.direwolf20.charginggadgets;
 
 import com.direwolf20.charginggadgets.blocks.BlockRegistry;
-import com.direwolf20.charginggadgets.blocks.chargingstation.ChargingStationScreen;
 import com.direwolf20.charginggadgets.blocks.chargingstation.ChargingStationTile;
-import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
@@ -11,7 +9,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
@@ -27,13 +25,14 @@ public class ChargingGadgets {
     public static final String MOD_ID = "charginggadgets";
     private static final Logger LOGGER = LogManager.getLogger();
 
-    public ChargingGadgets(IEventBus eventBus) {
+    public ChargingGadgets(IEventBus eventBus, ModContainer container) {
         //IEventBus event = FMLJavaModLoadingContext.get().getModEventBus();
 
         BlockRegistry.ITEMS.register(eventBus);
         BlockRegistry.BLOCKS.register(eventBus);
         BlockRegistry.TILES_ENTITIES.register(eventBus);
         BlockRegistry.CONTAINERS.register(eventBus);
+        CGDataComponents.COMPONENTS.register(eventBus);
 
         eventBus.addListener(this::setup);
         eventBus.addListener(this::registerCapabilities);
@@ -42,14 +41,14 @@ public class ChargingGadgets {
 
         //MinecraftForge.EVENT_BUS.register(this);
 
-        ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, Config.SERVER_CONFIG);
+        container.registerConfig(ModConfig.Type.SERVER, Config.SERVER_CONFIG);
     }
 
     private void setup(final FMLCommonSetupEvent event) {
     }
 
     private void clientSetup(final FMLClientSetupEvent event) {
-        MenuScreens.register(BlockRegistry.CHARGING_STATION_CONTAINER.get(), ChargingStationScreen::new);
+
     }
 
     private void setupCreativeTabs(final RegisterEvent event) {

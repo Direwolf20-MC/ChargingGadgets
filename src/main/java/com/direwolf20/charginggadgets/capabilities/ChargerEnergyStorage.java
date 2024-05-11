@@ -1,6 +1,7 @@
 package com.direwolf20.charginggadgets.capabilities;
 
 import com.direwolf20.charginggadgets.blocks.chargingstation.ChargingStationTile;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.neoforged.neoforge.common.util.INBTSerializable;
 import net.neoforged.neoforge.energy.IEnergyStorage;
@@ -20,14 +21,14 @@ public class ChargerEnergyStorage implements IEnergyStorage, INBTSerializable<Co
     }
 
     @Override
-    public CompoundTag serializeNBT() {
+    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
         CompoundTag tag = new CompoundTag();
         tag.putInt(KEY, this.energy);
         return tag;
     }
 
     @Override
-    public void deserializeNBT(CompoundTag nbt) {
+    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
         this.energy = nbt.getInt(KEY);
     }
 

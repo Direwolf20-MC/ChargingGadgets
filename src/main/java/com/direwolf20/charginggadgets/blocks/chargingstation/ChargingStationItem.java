@@ -1,12 +1,15 @@
 package com.direwolf20.charginggadgets.blocks.chargingstation;
 
+import com.direwolf20.charginggadgets.CGDataComponents;
 import com.direwolf20.charginggadgets.Config;
 import com.direwolf20.charginggadgets.utils.MagicHelpers;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
@@ -24,10 +27,14 @@ public class ChargingStationItem extends BlockItem {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
-        super.appendHoverText(stack, worldIn, tooltip, flagIn);
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flagIn) {
+        super.appendHoverText(stack, context, tooltip, flagIn);
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level == null || mc.player == null) {
+            return;
+        }
 
-        int power = stack.getOrCreateTag().getInt("energy");
+        int power = stack.getOrDefault(CGDataComponents.ENERGY, 0);
         if (power == 0)
             return;
 
@@ -39,7 +46,7 @@ public class ChargingStationItem extends BlockItem {
         BlockEntity te = worldIn.getBlockEntity(pos);
         if (te instanceof ChargingStationTile) {
             ChargingStationTile station = (ChargingStationTile) te;
-            station.energyStorage.receiveEnergy(stack.getOrCreateTag().getInt("energy"), false);
+            station.energyStorage.receiveEnergy(stack.getOrDefault(CGDataComponents.ENERGY, 0), false);
         }
 
         return super.updateCustomBlockEntityTag(pos, worldIn, player, stack, state);

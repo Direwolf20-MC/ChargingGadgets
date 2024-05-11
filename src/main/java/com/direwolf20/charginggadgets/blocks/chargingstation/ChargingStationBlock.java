@@ -1,10 +1,10 @@
 package com.direwolf20.charginggadgets.blocks.chargingstation;
 
+import com.direwolf20.charginggadgets.CGDataComponents;
 import com.direwolf20.charginggadgets.blocks.BlockRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.Containers;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Player;
@@ -67,7 +67,7 @@ public class ChargingStationBlock extends Block implements EntityBlock {
             drops.stream()
                     .filter(e -> e.getItem() instanceof ChargingStationItem)
                     .findFirst()
-                    .ifPresent(e -> e.getOrCreateTag().putInt("energy", tileEntity.energyStorage.getEnergyStored()));
+                    .ifPresent(e -> e.set(CGDataComponents.ENERGY, tileEntity.energyStorage.getEnergyStored()));
         }
 
         return drops;
@@ -91,17 +91,16 @@ public class ChargingStationBlock extends Block implements EntityBlock {
     }
 
     @Override
-    @SuppressWarnings("deprecation")
-    public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand hand, BlockHitResult blockRayTraceResult) {
+    public InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult hit) {
         // Only execute on the server
-        if (worldIn.isClientSide)
+        if (level.isClientSide)
             return InteractionResult.SUCCESS;
 
-        BlockEntity te = worldIn.getBlockEntity(pos);
+        BlockEntity te = level.getBlockEntity(blockPos);
         if (!(te instanceof ChargingStationTile))
             return InteractionResult.FAIL;
 
-        player.openMenu((MenuProvider) te, pos);
+        player.openMenu((MenuProvider) te, blockPos);
         return InteractionResult.SUCCESS;
     }
 

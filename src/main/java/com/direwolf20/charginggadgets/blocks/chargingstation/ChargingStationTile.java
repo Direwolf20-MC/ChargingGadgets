@@ -5,6 +5,7 @@ import com.direwolf20.charginggadgets.blocks.BlockRegistry;
 import com.direwolf20.charginggadgets.capabilities.ChargerEnergyStorage;
 import com.direwolf20.charginggadgets.capabilities.ChargerItemHandler;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
@@ -20,7 +21,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.common.CommonHooks;
 import net.neoforged.neoforge.energy.IEnergyStorage;
 
 import javax.annotation.Nullable;
@@ -136,7 +136,7 @@ public class ChargingStationTile extends BlockEntity implements MenuProvider {
     private boolean initBurn() {
         ItemStack stack = inventory.getStackInSlot(Slots.FUEL.id);
 
-        int burnTime = CommonHooks.getBurnTime(stack, RecipeType.SMELTING);
+        int burnTime = stack.getBurnTime(RecipeType.SMELTING);
         if (burnTime > 0) {
             //Item fuelStack = inventory.getStackInSlot(Slots.FUEL.id).getItem();
             ItemStack fuelStack = inventory.getStackInSlot(Slots.FUEL.id);
@@ -154,19 +154,19 @@ public class ChargingStationTile extends BlockEntity implements MenuProvider {
     }
 
     @Override
-    public void load(CompoundTag compound) {
-        super.load(compound);
+    public void loadAdditional(CompoundTag compound, HolderLookup.Provider provider) {
+        super.loadAdditional(compound, provider);
 
-        inventory.deserializeNBT(compound.getCompound("inv"));
-        energyStorage.deserializeNBT(compound.getCompound("energy"));
+        inventory.deserializeNBT(provider, compound.getCompound("inv"));
+        energyStorage.deserializeNBT(provider, compound.getCompound("energy"));
         counter = compound.getInt("counter");
         maxBurn = compound.getInt("maxburn");
     }
 
     @Override
-    public void saveAdditional(CompoundTag compound) {
-        compound.put("inv", inventory.serializeNBT());
-        compound.put("energy", energyStorage.serializeNBT());
+    public void saveAdditional(CompoundTag compound, HolderLookup.Provider provider) {
+        compound.put("inv", inventory.serializeNBT(provider));
+        compound.put("energy", energyStorage.serializeNBT(provider));
 
         compound.putInt("counter", counter);
         compound.putInt("maxburn", maxBurn);
@@ -175,25 +175,26 @@ public class ChargingStationTile extends BlockEntity implements MenuProvider {
     @Override
     public ClientboundBlockEntityDataPacket getUpdatePacket() {
         // Vanilla uses the type parameter to indicate which type of tile entity (command block, skull, or beacon?) is receiving the packet, but it seems like Forge has overridden this behavior
-        return ClientboundBlockEntityDataPacket.create(this, entity -> this.getUpdateTag());
+        return ClientboundBlockEntityDataPacket.create(this);
     }
 
     @Override
-    public CompoundTag getUpdateTag() {
-        CompoundTag compoundTag = new CompoundTag();
-        saveAdditional(compoundTag);
-        return compoundTag;
+    public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
+        CompoundTag tag = new CompoundTag();
+        saveAdditional(tag, provider);
+        return tag;
     }
 
 
     @Override
-    public void handleUpdateTag(CompoundTag tag) {
-        load(tag);
+    public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider lookupProvider) {
+        this.loadAdditional(tag, lookupProvider);
     }
 
     @Override
-    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
-        load(pkt.getTag());
+    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider lookupProvider) {
+        super.onDataPacket(net, pkt, lookupProvider);
+        //loadAdditional(pkt.getTag(), lookupProvider);
     }
 
     @Override
