@@ -15,7 +15,7 @@ import java.awt.*;
 import java.util.Arrays;
 
 public class ChargingStationScreen extends AbstractContainerScreen<ChargingStationContainer> {
-    private static final ResourceLocation background = new ResourceLocation(ChargingGadgets.MOD_ID, "textures/gui/charging_station.png");
+    private static final ResourceLocation background = ResourceLocation.fromNamespaceAndPath(ChargingGadgets.MOD_ID, "textures/gui/charging_station.png");
 
     private final ChargingStationContainer container;
 
