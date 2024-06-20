@@ -52,7 +52,7 @@ public class ChargingGadgets {
     }
 
     private void setupCreativeTabs(final RegisterEvent event) {
-        ResourceKey<CreativeModeTab> TAB = ResourceKey.create(Registries.CREATIVE_MODE_TAB, new ResourceLocation(MOD_ID, "creative_tab"));
+        ResourceKey<CreativeModeTab> TAB = ResourceKey.create(Registries.CREATIVE_MODE_TAB, ResourceLocation.fromNamespaceAndPath(MOD_ID, "creative_tab"));
         event.register(Registries.CREATIVE_MODE_TAB, creativeModeTabRegisterHelper ->
         {
             creativeModeTabRegisterHelper.register(TAB, CreativeModeTab.builder().icon(() -> new ItemStack(BlockRegistry.CHARGING_STATION_BI.get()))

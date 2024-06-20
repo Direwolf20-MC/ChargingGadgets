@@ -105,6 +105,10 @@ public final class DataGenerators {
 
 
     static class GeneratorLoots extends VanillaBlockLoot {
+        public GeneratorLoots(HolderLookup.Provider p_344962_) {
+            super(p_344962_);
+        }
+
         @Override
         protected void generate() {
             dropSelf(BlockRegistry.CHARGING_STATION.get());
