@@ -106,6 +106,10 @@ public class ChargingStationTile extends BlockEntity implements MenuProvider {
     }
 
     public boolean isChargingItem(IEnergyStorage energy) {
+        // Fix https://github.com/Direwolf20-MC/ChargingGadgets/issues/17 and https://github.com/Direwolf20-MC/MiningGadgets/issues/254 by
+        // simply setting the value to 0 for the mining gadget. Also fixes it for any other Energy based device that suffers from this bug
+        // in a single bug fix.
+        if (energy.getEnergyStored() < 0) energy.setEnergy(0);
         return energy.getEnergyStored() >= 0 && energy.receiveEnergy(energy.getEnergyStored(), true) >= 0;
     }
 
