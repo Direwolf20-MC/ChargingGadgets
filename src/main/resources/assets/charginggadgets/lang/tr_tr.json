@@ -1,0 +1,7 @@
+{
+  "block.charginggadgets.charging_station": "Şarj İstasyonu",
+  "itemGroup.charginggadgets": "Charging Gadgets",
+  "screen.charginggadgets.burn_time": "Kalan yanma süresi: %ss",
+  "screen.charginggadgets.energy": "Enerji: %s/%s FE",
+  "screen.charginggadgets.no_fuel": "Yakıt kaynağı boş"
+}
