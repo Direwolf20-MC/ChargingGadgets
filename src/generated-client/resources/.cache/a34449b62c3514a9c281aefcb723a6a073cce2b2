@@ -1,3 +1,4 @@
-// 1.21	2024-06-20T14:11:42.4309496	Block States: charginggadgets
+// 26.1.2	2026-04-12T13:14:13.4444203	Model Definitions - charginggadgets
 394cf5f3c2f3b54def172894da14caac4693b95e assets/charginggadgets/blockstates/charging_station.json
+8311adbe5a1195c92b095375e88749b152b02baa assets/charginggadgets/items/charging_station.json
 afcd533096c1b06fec0762b490286d26ae2bd464 assets/charginggadgets/models/block/charging_station.json
