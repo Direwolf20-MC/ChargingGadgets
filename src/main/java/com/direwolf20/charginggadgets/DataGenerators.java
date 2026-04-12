@@ -94,6 +94,7 @@ public final class DataGenerators {
         @Override
         protected void addTranslations() {
             addBlock(BlockRegistry.CHARGING_STATION, "Charging Station");
+            addItem(BlockRegistry.CHARGING_STATION_BI, "Charging Station");
             add("itemGroup.charginggadgets", "Charging Gadgets");
             add("screen.charginggadgets.energy", "Energy: %s/%s FE");
             add("screen.charginggadgets.no_fuel", "Fuel source empty");
