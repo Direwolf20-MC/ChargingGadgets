@@ -27,6 +27,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.transfer.access.ItemAccess;
 import net.neoforged.neoforge.transfer.energy.EnergyHandler;
 import net.neoforged.neoforge.transfer.item.ItemResource;
 import net.neoforged.neoforge.transfer.transaction.Transaction;
@@ -99,9 +100,8 @@ public class ChargingStationTile extends BlockEntity implements MenuProvider {
         if (t instanceof ChargingStationTile entity) {
             entity.tryBurn();
 
-            ItemStack stack = entity.getStackFromSlot(Slots.CHARGE.id);
-            if (!stack.isEmpty())
-                entity.chargeItem(stack);
+            if (!entity.inventory.getResource(Slots.CHARGE.id).isEmpty())
+                entity.chargeItem();
         }
     }
 
@@ -114,8 +114,10 @@ public class ChargingStationTile extends BlockEntity implements MenuProvider {
         return resource.toStack(inventory.getAmountAsInt(slot));
     }
 
-    private void chargeItem(ItemStack stack) {
-        EnergyHandler energy = stack.getCapability(Capabilities.Energy.ITEM, null);
+    private void chargeItem() {
+        // Use ItemAccess to get a slot-bound capability — mutations propagate back to the inventory
+        ItemAccess chargeSlotAccess = ItemAccess.forHandlerIndex(inventory, Slots.CHARGE.id);
+        EnergyHandler energy = chargeSlotAccess.getCapability(Capabilities.Energy.ITEM);
         if (energy == null) return;
 
         // Check if the item can accept energy
@@ -127,8 +129,8 @@ public class ChargingStationTile extends BlockEntity implements MenuProvider {
         int toTransfer = Math.min(energyStorage.getAmountAsInt(), 2500);
         try (Transaction tx = Transaction.openRoot()) {
             int energyInserted = energy.insert(toTransfer, tx);
-            tx.commit();
             energyStorage.consumeEnergy(energyInserted, false);
+            tx.commit();
         }
     }
 

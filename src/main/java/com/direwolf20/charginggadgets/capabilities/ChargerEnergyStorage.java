@@ -23,8 +23,8 @@ public class ChargerEnergyStorage extends SimpleEnergyHandler {
 
     /**
      * Internal method to consume energy for charging items.
-     * Since we set maxExtract=0, external extraction is blocked,
-     * but we need this for internal use.
+     * Uses set() directly since maxExtract=0 blocks the normal extract() path,
+     * but we still need internal consumption.
      */
     public int consumeEnergy(int amount, boolean simulate) {
         int consumed = Math.min(getAmountAsInt(), amount);
