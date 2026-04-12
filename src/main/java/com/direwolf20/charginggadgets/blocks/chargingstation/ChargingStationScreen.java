@@ -2,20 +2,23 @@ package com.direwolf20.charginggadgets.blocks.chargingstation;
 
 import com.direwolf20.charginggadgets.ChargingGadgets;
 import com.direwolf20.charginggadgets.utils.MagicHelpers;
-import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.ARGB;
 import net.minecraft.world.entity.player.Inventory;
 
 import java.awt.*;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 
 public class ChargingStationScreen extends AbstractContainerScreen<ChargingStationContainer> {
-    private static final ResourceLocation background = ResourceLocation.fromNamespaceAndPath(ChargingGadgets.MOD_ID, "textures/gui/charging_station.png");
+    private static final Identifier background = Identifier.fromNamespaceAndPath(ChargingGadgets.MOD_ID, "textures/gui/charging_station.png");
 
     private final ChargingStationContainer container;
 
@@ -25,18 +28,16 @@ public class ChargingStationScreen extends AbstractContainerScreen<ChargingStati
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
-        //this.renderBackground(guiGraphics);
-        super.render(guiGraphics, mouseX, mouseY, partialTicks);
+    public void extractRenderState(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTicks) {
+        super.extractRenderState(guiGraphics, mouseX, mouseY, partialTicks);
 
-        this.renderTooltip(guiGraphics, mouseX, mouseY); // @mcp: renderTooltip = renderHoveredToolTip
         if (mouseX > (leftPos + 7) && mouseX < (leftPos + 7) + 18 && mouseY > (topPos + 7) && mouseY < (topPos + 7) + 73)
-            guiGraphics.renderTooltip(font, Language.getInstance().getVisualOrder(Arrays.asList(
+            guiGraphics.setTooltipForNextFrame(font, List.of(
                     Component.translatable("screen.charginggadgets.energy", MagicHelpers.withSuffix(this.container.getEnergy()), MagicHelpers.withSuffix(this.container.getMaxPower())),
                     this.container.getRemaining() <= 0 ?
                             Component.translatable("screen.charginggadgets.no_fuel") :
                             Component.translatable("screen.charginggadgets.burn_time", MagicHelpers.ticksInSeconds(this.container.getRemaining()))
-            )), mouseX, mouseY);
+            ), Optional.empty(), mouseX, mouseY);
     }
 
     @Override
@@ -45,26 +46,25 @@ public class ChargingStationScreen extends AbstractContainerScreen<ChargingStati
     }
 
     @Override
-    protected void renderBg(GuiGraphics guiGraphics, float partialTicks, int mouseX, int mouseY) {
-        RenderSystem.setShaderColor(1, 1, 1, 1);
-        guiGraphics.blit(background, leftPos, topPos, 0, 0, imageWidth, imageHeight);
+    public void extractBackground(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTicks) {
+        super.extractBackground(guiGraphics, mouseX, mouseY, partialTicks);
+        guiGraphics.blit(RenderPipelines.GUI_TEXTURED, background, leftPos, topPos, 0, 0, imageWidth, imageHeight, 256, 256);
 
         int maxHeight = 13;
         if (this.container.getMaxBurn() > 0) {
             int remaining = (this.container.getRemaining() * maxHeight) / this.container.getMaxBurn();
-            guiGraphics.blit(background, leftPos + 66, topPos + 26 + 13 - remaining, 176, 13 - remaining, 14, remaining + 1);
+            guiGraphics.blit(RenderPipelines.GUI_TEXTURED, background, leftPos + 66, topPos + 26 + 13 - remaining, 176, 13 - remaining, 14, remaining + 1, 256, 256);
         }
 
         int maxEnergy = this.container.getMaxPower(), height = 70;
         if (maxEnergy > 0) {
             int remaining = (this.container.getEnergy() * height) / maxEnergy;
-            guiGraphics.blit(background, leftPos + 8, topPos + 78 - remaining, 176, 84 - remaining, 16, remaining + 1);
+            guiGraphics.blit(RenderPipelines.GUI_TEXTURED, background, leftPos + 8, topPos + 78 - remaining, 176, 84 - remaining, 16, remaining + 1, 256, 256);
         }
     }
 
     @Override
-    protected void renderLabels(GuiGraphics guiGraphics, int mouseX, int mouseY) {
-        guiGraphics.drawString(font, I18n.get("block.charginggadgets.charging_station"), 55, 8, Color.DARK_GRAY.getRGB(), false);
+    protected void extractLabels(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY) {
+        guiGraphics.text(font, I18n.get("block.charginggadgets.charging_station"), 55, 8, ARGB.opaque(Color.DARK_GRAY.getRGB()), false);
     }
 }
-

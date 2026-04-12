@@ -1,6 +1,7 @@
 package com.direwolf20.charginggadgets.blocks.chargingstation;
 
 import com.direwolf20.charginggadgets.blocks.BlockRegistry;
+import com.direwolf20.charginggadgets.capabilities.ChargerItemHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
@@ -13,9 +14,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.ItemStackHandler;
-import net.neoforged.neoforge.items.SlotItemHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.item.ItemStacksResourceHandler;
+import net.neoforged.neoforge.transfer.item.ResourceHandlerSlot;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -24,16 +25,16 @@ public class ChargingStationContainer extends AbstractContainerMenu {
     private static final int SLOTS = 2;
 
     public final ContainerData data;
-    public ItemStackHandler handler;
+    public ChargerItemHandler handler;
 
     // Tile can be null and shouldn't be used for accessing any data that needs to be up to date on both sides
     private ChargingStationTile tile;
 
     public ChargingStationContainer(int windowId, Inventory playerInventory, FriendlyByteBuf extraData) {
-        this((ChargingStationTile) playerInventory.player.level().getBlockEntity(extraData.readBlockPos()), new SimpleContainerData(4), windowId, playerInventory, new ItemStackHandler(2));
+        this((ChargingStationTile) playerInventory.player.level().getBlockEntity(extraData.readBlockPos()), new SimpleContainerData(4), windowId, playerInventory, new ChargerItemHandler(null));
     }
 
-    public ChargingStationContainer(@Nullable ChargingStationTile tile, ContainerData chargingStationData, int windowId, Inventory playerInventory, ItemStackHandler handler) {
+    public ChargingStationContainer(@Nullable ChargingStationTile tile, ContainerData chargingStationData, int windowId, Inventory playerInventory, ChargerItemHandler handler) {
         super(BlockRegistry.CHARGING_STATION_CONTAINER.get(), windowId);
 
         this.handler = handler;
@@ -46,8 +47,8 @@ public class ChargingStationContainer extends AbstractContainerMenu {
     }
 
     public void setup(Inventory inventory) {
-        addSlot(new RestrictedSlot(handler, 0, 65, 43));
-        addSlot(new RestrictedSlot(handler, 1, 119, 43));
+        addSlot(new ResourceHandlerSlot(handler, handler::set, 0, 65, 43));
+        addSlot(new ResourceHandlerSlot(handler, handler::set, 1, 119, 43));
 
         // Slots for the hotbar
         for (int row = 0; row < 9; ++row) {
@@ -112,22 +113,5 @@ public class ChargingStationContainer extends AbstractContainerMenu {
 
     public int getRemaining() {
         return this.data.get(2);
-    }
-
-    static class RestrictedSlot extends SlotItemHandler {
-        public RestrictedSlot(IItemHandler itemHandler, int index, int xPosition, int yPosition) {
-            super(itemHandler, index, xPosition, yPosition);
-        }
-
-        @Override
-        public boolean mayPlace(@Nonnull ItemStack stack) {
-            if (getSlotIndex() == ChargingStationTile.Slots.CHARGE.getId())
-                return stack.getCapability(Capabilities.EnergyStorage.ITEM) != null;
-
-            if (getSlotIndex() == ChargingStationTile.Slots.FUEL.getId())
-                return stack.getBurnTime(RecipeType.SMELTING) != 0;
-
-            return super.mayPlace(stack);
-        }
     }
 }

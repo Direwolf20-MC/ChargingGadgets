@@ -1,90 +1,88 @@
 package com.direwolf20.charginggadgets;
 
 import com.direwolf20.charginggadgets.blocks.BlockRegistry;
+import net.minecraft.client.data.models.BlockModelGenerators;
+import net.minecraft.client.data.models.ItemModelGenerators;
+import net.minecraft.client.data.models.ModelProvider;
+import net.minecraft.client.data.models.model.ModelTemplates;
+import net.minecraft.client.data.models.model.TextureMapping;
+import net.minecraft.client.data.models.model.TextureSlot;
+import net.minecraft.client.resources.model.sprite.Material;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
+import net.minecraft.resources.Identifier;
 import net.minecraft.data.loot.LootTableProvider;
 import net.minecraft.data.loot.packs.VanillaBlockLoot;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.RecipeProvider;
-import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.model.generators.BlockStateProvider;
-import net.neoforged.neoforge.client.model.generators.ItemModelProvider;
-import net.neoforged.neoforge.client.model.generators.ModelFile;
 import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.common.data.BlockTagsProvider;
-import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import net.neoforged.neoforge.common.data.LanguageProvider;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-@EventBusSubscriber(modid = ChargingGadgets.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = ChargingGadgets.MOD_ID)
 public final class DataGenerators {
+
     @SubscribeEvent
-    public static void gatherData(GatherDataEvent event) {
-        var includeServer = event.includeServer();
-        var includeClient = event.includeClient();
+    public static void gatherClientData(GatherDataEvent.Client event) {
         var generator = event.getGenerator();
-        var helper = event.getExistingFileHelper();
-        var packOutput = event.getGenerator().getPackOutput();
+        var packOutput = generator.getPackOutput();
+
+        generator.addProvider(true, new GeneratorLanguage(packOutput));
+        generator.addProvider(true, new GeneratorModels(packOutput));
+    }
+
+    @SubscribeEvent
+    public static void gatherServerData(GatherDataEvent.Server event) {
+        var generator = event.getGenerator();
+        var packOutput = generator.getPackOutput();
         CompletableFuture<HolderLookup.Provider> lookupProvider = event.getLookupProvider();
 
-        // Client
-        generator.addProvider(includeClient, new GeneratorLanguage(packOutput));
-        generator.addProvider(includeClient, new GeneratorBlockStates(packOutput, event.getExistingFileHelper()));
-
-
-        // Server
-        generator.addProvider(event.includeServer(), new LootTableProvider(packOutput, Collections.emptySet(),
-                List.of(new LootTableProvider.SubProviderEntry(GeneratorLoots::new, LootContextParamSets.BLOCK)), event.getLookupProvider()));
-        generator.addProvider(includeServer, new GeneratorRecipes(packOutput, lookupProvider));
-        generator.addProvider(includeServer, new GeneratorBlockTags(packOutput, lookupProvider, event.getExistingFileHelper()));
-        generator.addProvider(includeServer, new GeneratorItemModels(packOutput, event.getExistingFileHelper()));
+        generator.addProvider(true, new LootTableProvider(packOutput, Collections.emptySet(),
+                List.of(new LootTableProvider.SubProviderEntry(GeneratorLoots::new, LootContextParamSets.BLOCK)), lookupProvider));
+        generator.addProvider(true, new GeneratorRecipes.Runner(packOutput, lookupProvider));
+        generator.addProvider(true, new GeneratorBlockTags(packOutput, lookupProvider));
     }
 
-    static class GeneratorBlockStates extends BlockStateProvider {
-        public GeneratorBlockStates(PackOutput output, ExistingFileHelper exFileHelper) {
-            super(output, ChargingGadgets.MOD_ID, exFileHelper);
+    static class GeneratorModels extends ModelProvider {
+        public GeneratorModels(PackOutput output) {
+            super(output, ChargingGadgets.MOD_ID);
         }
 
         @Override
-        protected void registerStatesAndModels() {
-            horizontalBlock(BlockRegistry.CHARGING_STATION.get(), models().orientableWithBottom(
-                    BlockRegistry.CHARGING_STATION.getId().getPath(),
-                    modLoc("block/charging_station_side"),
-                    modLoc("block/charging_station_fronton"),
-                    modLoc("block/charging_station_bottom"),
-                    modLoc("block/charging_station_top")
-            ));
-        }
-    }
+        protected void registerModels(BlockModelGenerators blockModels, ItemModelGenerators itemModels) {
+            // The charging station is a horizontally-rotated block with different faces
+            // Custom texture mapping because textures use "fronton" not "front"
+            Block block = BlockRegistry.CHARGING_STATION.get();
+            Identifier modId = Identifier.fromNamespaceAndPath(ChargingGadgets.MOD_ID, "block/charging_station");
+            TextureMapping mapping = new TextureMapping()
+                    .put(TextureSlot.SIDE, new Material(modId.withSuffix("_side")))
+                    .put(TextureSlot.FRONT, new Material(modId.withSuffix("_fronton")))
+                    .put(TextureSlot.TOP, new Material(modId.withSuffix("_top")))
+                    .put(TextureSlot.BOTTOM, new Material(modId.withSuffix("_bottom")));
 
-    static class GeneratorItemModels extends ItemModelProvider {
-        public GeneratorItemModels(PackOutput output, ExistingFileHelper existingFileHelper) {
-            super(output, ChargingGadgets.MOD_ID, existingFileHelper);
-        }
-
-        @Override
-        protected void registerModels() {
-            String path = BlockRegistry.CHARGING_STATION.getId().getPath();
-            getBuilder(path).parent(new ModelFile.UncheckedModelFile(modLoc("block/" + path)));
-        }
-
-        @Override
-        public String getName() {
-            return "Item Models";
+            Identifier modelId = ModelTemplates.CUBE_ORIENTABLE_TOP_BOTTOM.create(
+                    block,
+                    mapping,
+                    blockModels.modelOutput
+            );
+            blockModels.blockStateOutput.accept(
+                    BlockModelGenerators.createSimpleBlock(block, BlockModelGenerators.plainVariant(modelId))
+                            .with(BlockModelGenerators.ROTATION_HORIZONTAL_FACING)
+            );
+            // BlockItem model is auto-resolved from the block model by ModelProvider
         }
     }
 
@@ -123,16 +121,14 @@ public final class DataGenerators {
     }
 
     static class GeneratorRecipes extends RecipeProvider {
-        public GeneratorRecipes(PackOutput output, CompletableFuture<HolderLookup.Provider> completableFuture) {
-            super(output, completableFuture);
+        public GeneratorRecipes(HolderLookup.Provider registries, RecipeOutput output) {
+            super(registries, output);
         }
 
-
         @Override
-        protected void buildRecipes(RecipeOutput consumer) {
+        protected void buildRecipes() {
             Block block = BlockRegistry.CHARGING_STATION.get();
-            ShapedRecipeBuilder
-                    .shaped(RecipeCategory.REDSTONE, block)
+            shaped(RecipeCategory.REDSTONE, block)
                     .define('i', Tags.Items.INGOTS_IRON)
                     .define('r', Tags.Items.DUSTS_REDSTONE)
                     .define('l', Tags.Items.STORAGE_BLOCKS_COAL)
@@ -141,13 +137,29 @@ public final class DataGenerators {
                     .pattern("drd")
                     .pattern("ili")
                     .unlockedBy("has_diamonds", has(Tags.Items.GEMS_DIAMOND))
-                    .save(consumer);
+                    .save(output);
+        }
+
+        public static class Runner extends RecipeProvider.Runner {
+            public Runner(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider) {
+                super(output, lookupProvider);
+            }
+
+            @Override
+            protected RecipeProvider createRecipeProvider(HolderLookup.Provider registries, RecipeOutput output) {
+                return new GeneratorRecipes(registries, output);
+            }
+
+            @Override
+            public String getName() {
+                return "Charging Gadgets Recipes";
+            }
         }
     }
 
     static class GeneratorBlockTags extends BlockTagsProvider {
-        public GeneratorBlockTags(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider, @Nullable ExistingFileHelper existingFileHelper) {
-            super(output, lookupProvider, ChargingGadgets.MOD_ID, existingFileHelper);
+        public GeneratorBlockTags(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider) {
+            super(output, lookupProvider, ChargingGadgets.MOD_ID);
         }
 
         @Override
@@ -156,4 +168,3 @@ public final class DataGenerators {
         }
     }
 }
-

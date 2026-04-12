@@ -16,16 +16,23 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.level.block.entity.FuelValues;
 import net.minecraft.world.level.Level;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.Containers;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.energy.IEnergyStorage;
+import net.neoforged.neoforge.transfer.energy.EnergyHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
 
 import javax.annotation.Nullable;
 
-// Todo: completely rewrite this class from the ground up
 public class ChargingStationTile extends BlockEntity implements MenuProvider {
     public enum Slots {
         FUEL(0),
@@ -53,8 +60,8 @@ public class ChargingStationTile extends BlockEntity implements MenuProvider {
         @Override
         public int get(int index) {
             return switch (index) {
-                case 0 -> ChargingStationTile.this.energyStorage.getEnergyStored() / 32;
-                case 1 -> ChargingStationTile.this.energyStorage.getMaxEnergyStored() / 32;
+                case 0 -> ChargingStationTile.this.energyStorage.getAmountAsInt() / 32;
+                case 1 -> ChargingStationTile.this.energyStorage.getCapacityAsInt() / 32;
                 case 2 -> ChargingStationTile.this.counter;
                 case 3 -> ChargingStationTile.this.maxBurn;
                 default -> throw new IllegalArgumentException("Invalid index: " + index);
@@ -84,47 +91,63 @@ public class ChargingStationTile extends BlockEntity implements MenuProvider {
         return new ChargingStationContainer(this, this.chargingStationData, i, playerInventory, this.inventory);
     }
 
+    public FuelValues getFuelValues() {
+        return level.getServer().fuelValues();
+    }
+
     public static <T extends BlockEntity> void ticker(Level level, BlockPos blockPos, BlockState state, T t) {
         if (t instanceof ChargingStationTile entity) {
             entity.tryBurn();
 
-            ItemStack stack = entity.inventory.getStackInSlot(Slots.CHARGE.id);
+            ItemStack stack = entity.getStackFromSlot(Slots.CHARGE.id);
             if (!stack.isEmpty())
                 entity.chargeItem(stack);
         }
     }
 
-
-    private void chargeItem(ItemStack stack) {
-        IEnergyStorage energy = stack.getCapability(Capabilities.EnergyStorage.ITEM);
-        if (energy == null) return;
-        if (!isChargingItem(energy))
-            return;
-
-        int energyRemoved = energy.receiveEnergy(Math.min(energyStorage.getEnergyStored(), 2500), false);
-        energyStorage.consumeEnergy(energyRemoved, false);
+    /**
+     * Helper to get an ItemStack from a slot in the resource handler.
+     */
+    public ItemStack getStackFromSlot(int slot) {
+        ItemResource resource = inventory.getResource(slot);
+        if (resource.isEmpty()) return ItemStack.EMPTY;
+        return resource.toStack(inventory.getAmountAsInt(slot));
     }
 
-    public boolean isChargingItem(IEnergyStorage energy) {
-        return energy.getEnergyStored() >= 0 && energy.receiveEnergy(energy.getEnergyStored(), true) >= 0;
+    private void chargeItem(ItemStack stack) {
+        EnergyHandler energy = stack.getCapability(Capabilities.Energy.ITEM, null);
+        if (energy == null) return;
+
+        // Check if the item can accept energy
+        try (Transaction tx = Transaction.openRoot()) {
+            if (energy.insert(1, tx) <= 0) return;
+            // Don't commit — this was just a check
+        }
+
+        int toTransfer = Math.min(energyStorage.getAmountAsInt(), 2500);
+        try (Transaction tx = Transaction.openRoot()) {
+            int energyInserted = energy.insert(toTransfer, tx);
+            tx.commit();
+            energyStorage.consumeEnergy(energyInserted, false);
+        }
     }
 
     private void tryBurn() {
         if (level == null)
             return;
 
-        boolean canInsertEnergy = energyStorage.receiveEnergy(625, true) > 0;
+        boolean canInsertEnergy = energyStorage.addEnergy(625, true) > 0;
         if (counter > 0 && canInsertEnergy) {
-            burn(energyStorage);
+            burn();
         } else if (canInsertEnergy) {
             if (initBurn())
-                burn(energyStorage);
+                burn();
         }
     }
 
 
-    private void burn(IEnergyStorage energyStorage) {
-        energyStorage.receiveEnergy(625, false);
+    private void burn() {
+        energyStorage.addEnergy(625, false);
 
         counter--;
         if (counter == 0) {
@@ -134,16 +157,27 @@ public class ChargingStationTile extends BlockEntity implements MenuProvider {
     }
 
     private boolean initBurn() {
-        ItemStack stack = inventory.getStackInSlot(Slots.FUEL.id);
+        ItemStack stack = getStackFromSlot(Slots.FUEL.id);
 
-        int burnTime = stack.getBurnTime(RecipeType.SMELTING);
+        int burnTime = stack.getBurnTime(RecipeType.SMELTING, getFuelValues());
         if (burnTime > 0) {
-            //Item fuelStack = inventory.getStackInSlot(Slots.FUEL.id).getItem();
-            ItemStack fuelStack = inventory.getStackInSlot(Slots.FUEL.id);
-            if (fuelStack.hasCraftingRemainingItem())
-                inventory.setStackInSlot(Slots.FUEL.id, fuelStack.getCraftingRemainingItem());
-            else
-                fuelStack.shrink(1);
+            ItemStack fuelStack = getStackFromSlot(Slots.FUEL.id);
+            ItemStackTemplate remainderTemplate = fuelStack.getItem().getCraftingRemainder();
+            if (remainderTemplate != null) {
+                ItemStack remainder = remainderTemplate.create();
+                // Set the remainder in the fuel slot
+                try (Transaction tx = Transaction.openRoot()) {
+                    inventory.extract(Slots.FUEL.id, inventory.getResource(Slots.FUEL.id), inventory.getAmountAsInt(Slots.FUEL.id), tx);
+                    inventory.insert(Slots.FUEL.id, ItemResource.of(remainder), remainder.getCount(), tx);
+                    tx.commit();
+                }
+            } else {
+                // Shrink the fuel by 1
+                try (Transaction tx = Transaction.openRoot()) {
+                    inventory.extract(Slots.FUEL.id, inventory.getResource(Slots.FUEL.id), 1, tx);
+                    tx.commit();
+                }
+            }
 
             setChanged();
             counter = (int) Math.floor(burnTime) / 50;
@@ -154,47 +188,57 @@ public class ChargingStationTile extends BlockEntity implements MenuProvider {
     }
 
     @Override
-    public void loadAdditional(CompoundTag compound, HolderLookup.Provider provider) {
-        super.loadAdditional(compound, provider);
+    protected void loadAdditional(ValueInput input) {
+        super.loadAdditional(input);
 
-        inventory.deserializeNBT(provider, compound.getCompound("inv"));
-        energyStorage.deserializeNBT(provider, compound.getCompound("energy"));
-        counter = compound.getInt("counter");
-        maxBurn = compound.getInt("maxburn");
+        input.child("inv").ifPresent(inventory::deserialize);
+        energyStorage.deserialize(input);
+        counter = input.getIntOr("counter", 0);
+        maxBurn = input.getIntOr("maxburn", 0);
     }
 
     @Override
-    public void saveAdditional(CompoundTag compound, HolderLookup.Provider provider) {
-        compound.put("inv", inventory.serializeNBT(provider));
-        compound.put("energy", energyStorage.serializeNBT(provider));
+    protected void saveAdditional(ValueOutput output) {
+        super.saveAdditional(output);
 
-        compound.putInt("counter", counter);
-        compound.putInt("maxburn", maxBurn);
+        inventory.serialize(output.child("inv"));
+        energyStorage.serialize(output);
+
+        output.putInt("counter", counter);
+        output.putInt("maxburn", maxBurn);
     }
 
     @Override
     public ClientboundBlockEntityDataPacket getUpdatePacket() {
-        // Vanilla uses the type parameter to indicate which type of tile entity (command block, skull, or beacon?) is receiving the packet, but it seems like Forge has overridden this behavior
         return ClientboundBlockEntityDataPacket.create(this);
     }
 
     @Override
     public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
-        CompoundTag tag = new CompoundTag();
-        saveAdditional(tag, provider);
-        return tag;
-    }
-
-
-    @Override
-    public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider lookupProvider) {
-        this.loadAdditional(tag, lookupProvider);
+        return saveCustomOnly(provider);
     }
 
     @Override
-    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider lookupProvider) {
-        super.onDataPacket(net, pkt, lookupProvider);
-        //loadAdditional(pkt.getTag(), lookupProvider);
+    public void handleUpdateTag(ValueInput input) {
+        this.loadAdditional(input);
+    }
+
+    @Override
+    public void onDataPacket(Connection net, ValueInput input) {
+        super.onDataPacket(net, input);
+    }
+
+    @Override
+    public void preRemoveSideEffects(BlockPos pos, BlockState state) {
+        if (level instanceof ServerLevel) {
+            for (int i = 0; i < inventory.size(); i++) {
+                ItemResource r = inventory.getResource(i);
+                if (!r.isEmpty()) {
+                    Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), r.toStack(inventory.getAmountAsInt(i)));
+                }
+            }
+        }
+        super.preRemoveSideEffects(pos, state);
     }
 
     @Override

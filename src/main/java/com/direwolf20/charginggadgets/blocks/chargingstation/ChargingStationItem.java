@@ -12,13 +12,14 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.Nullable;
-import java.util.List;
+import java.util.function.Consumer;
 
 public class ChargingStationItem extends BlockItem {
 
@@ -27,8 +28,8 @@ public class ChargingStationItem extends BlockItem {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flagIn) {
-        super.appendHoverText(stack, context, tooltip, flagIn);
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, TooltipDisplay display, Consumer<Component> tooltip, TooltipFlag flagIn) {
+        super.appendHoverText(stack, context, display, tooltip, flagIn);
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null || mc.player == null) {
             return;
@@ -38,15 +39,14 @@ public class ChargingStationItem extends BlockItem {
         if (power == 0)
             return;
 
-        tooltip.add(Component.translatable("screen.charginggadgets.energy", MagicHelpers.withSuffix(power), MagicHelpers.withSuffix(Config.GENERAL.chargerMaxPower.get())).withStyle(ChatFormatting.GREEN));
+        tooltip.accept(Component.translatable("screen.charginggadgets.energy", MagicHelpers.withSuffix(power), MagicHelpers.withSuffix(Config.GENERAL.chargerMaxPower.get())).withStyle(ChatFormatting.GREEN));
     }
 
     @Override
     protected boolean updateCustomBlockEntityTag(BlockPos pos, Level worldIn, @Nullable Player player, ItemStack stack, BlockState state) {
         BlockEntity te = worldIn.getBlockEntity(pos);
-        if (te instanceof ChargingStationTile) {
-            ChargingStationTile station = (ChargingStationTile) te;
-            station.energyStorage.receiveEnergy(stack.getOrDefault(CGDataComponents.ENERGY, 0), false);
+        if (te instanceof ChargingStationTile station) {
+            station.energyStorage.addEnergy(stack.getOrDefault(CGDataComponents.ENERGY, 0), false);
         }
 
         return super.updateCustomBlockEntityTag(pos, worldIn, player, stack, state);

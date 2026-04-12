@@ -1,94 +1,64 @@
 package com.direwolf20.charginggadgets.capabilities;
 
 import com.direwolf20.charginggadgets.blocks.chargingstation.ChargingStationTile;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
-import net.neoforged.neoforge.common.util.INBTSerializable;
-import net.neoforged.neoforge.energy.IEnergyStorage;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.neoforged.neoforge.transfer.energy.SimpleEnergyHandler;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
 
 
-public class ChargerEnergyStorage implements IEnergyStorage, INBTSerializable<CompoundTag> {
+public class ChargerEnergyStorage extends SimpleEnergyHandler {
     private static final String KEY = "energy";
-    private int energy;
-    private int capacity;
-    private int maxInOut = 1000000;
-    private ChargingStationTile tile;
+    private final ChargingStationTile tile;
 
     public ChargerEnergyStorage(ChargingStationTile tile, int energy, int capacity) {
-        this.energy = energy;
-        this.capacity = capacity;
+        super(capacity, capacity, 0, energy); // maxInsert = capacity (internal use), maxExtract = 0 (no external extraction)
         this.tile = tile;
     }
 
     @Override
-    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
-        CompoundTag tag = new CompoundTag();
-        tag.putInt(KEY, this.energy);
-        return tag;
+    protected void onEnergyChanged(int previousAmount) {
+        tile.setChanged();
     }
 
-    @Override
-    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
-        this.energy = nbt.getInt(KEY);
-    }
-
-    @Override
-    public int receiveEnergy(int maxReceive, boolean simulate) {
-        int energyReceived = Math.min(capacity - energy, Math.min(this.maxInOut, maxReceive));
-
-        if (!simulate) {
-            energy += energyReceived;
-            this.tile.setChanged();
+    /**
+     * Internal method to consume energy for charging items.
+     * Since we set maxExtract=0, external extraction is blocked,
+     * but we need this for internal use.
+     */
+    public int consumeEnergy(int amount, boolean simulate) {
+        int consumed = Math.min(getAmountAsInt(), amount);
+        if (!simulate && consumed > 0) {
+            set(getAmountAsInt() - consumed);
         }
-
-        return energyReceived;
+        return consumed;
     }
 
-    public int consumeEnergy(int maxExtract, boolean simulate) {
-        int energyExtracted = Math.min(energy, Math.min(this.maxInOut, maxExtract));
-
-        if (!simulate)
-            energy -= energyExtracted;
-
-        return energyExtracted;
+    /**
+     * Convenience method for internal insert (e.g. from fuel burning).
+     * Returns the amount actually inserted.
+     */
+    public int addEnergy(int amount, boolean simulate) {
+        try (Transaction tx = Transaction.openRoot()) {
+            int inserted = insert(amount, tx);
+            if (!simulate) tx.commit();
+            return inserted;
+        }
     }
 
-    public void setEnergy(int energy) {
-        this.energy = energy;
+    public void serialize(ValueOutput output) {
+        output.putInt(KEY, getAmountAsInt());
     }
 
-    // We don't use this method and thus we don't let other people use it either
-    @Override
-    public int extractEnergy(int maxExtract, boolean simulate) {
-        return 0;
-    }
-
-    @Override
-    public int getEnergyStored() {
-        return this.energy;
-    }
-
-    @Override
-    public int getMaxEnergyStored() {
-        return this.capacity;
-    }
-
-    @Override
-    public boolean canExtract() {
-        return false;
-    }
-
-    @Override
-    public boolean canReceive() {
-        return true;
+    public void deserialize(ValueInput input) {
+        set(input.getIntOr(KEY, 0));
     }
 
     @Override
     public String toString() {
         return "ChargerEnergyStorage{" +
-                "energy=" + energy +
-                ", capacity=" + capacity +
-                ", maxInOut=" + maxInOut +
+                "energy=" + getAmountAsInt() +
+                ", capacity=" + getCapacityAsInt() +
                 '}';
     }
 }

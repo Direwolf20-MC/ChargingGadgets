@@ -10,6 +10,7 @@ import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -18,17 +19,18 @@ import java.util.function.Supplier;
 
 
 public class BlockRegistry {
-    public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(Registries.BLOCK, ChargingGadgets.MOD_ID);
+    public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(ChargingGadgets.MOD_ID);
     public static final DeferredRegister<BlockEntityType<?>> TILES_ENTITIES = DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, ChargingGadgets.MOD_ID);
     public static final DeferredRegister<MenuType<?>> CONTAINERS = DeferredRegister.create(Registries.MENU, ChargingGadgets.MOD_ID);
 
-    public static final DeferredHolder<Block, ChargingStationBlock> CHARGING_STATION = BLOCKS.register("charging_station", ChargingStationBlock::new);
+    public static final DeferredHolder<Block, ChargingStationBlock> CHARGING_STATION =
+            BLOCKS.registerBlock("charging_station", ChargingStationBlock::new, () -> BlockBehaviour.Properties.of().strength(2f));
 
     /**
      * Tile Entities
      */
     public static final Supplier<BlockEntityType<ChargingStationTile>> CHARGING_STATION_TILE =
-            TILES_ENTITIES.register("charging_station_tile", () -> BlockEntityType.Builder.of(ChargingStationTile::new, CHARGING_STATION.get()).build(null));
+            TILES_ENTITIES.register("charging_station_tile", () -> new BlockEntityType<>(ChargingStationTile::new, CHARGING_STATION.get()));
 
     /**
      * Containers?
@@ -39,6 +41,7 @@ public class BlockRegistry {
      * For now I'm adding items into here, it doesn't make much sense but nor does an items package for a mod with no
      * items... so... when we add items. Move this!
      */
-    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(Registries.ITEM, ChargingGadgets.MOD_ID);
-    public static final Supplier<Item> CHARGING_STATION_BI = ITEMS.register("charging_station", () -> new ChargingStationItem(CHARGING_STATION.get(), new Item.Properties()));
+    public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(ChargingGadgets.MOD_ID);
+    public static final Supplier<Item> CHARGING_STATION_BI =
+            ITEMS.registerItem("charging_station", props -> new ChargingStationItem(CHARGING_STATION.get(), props), Item.Properties::new);
 }

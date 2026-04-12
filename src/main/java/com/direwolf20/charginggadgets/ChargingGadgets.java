@@ -4,8 +4,8 @@ import com.direwolf20.charginggadgets.blocks.BlockRegistry;
 import com.direwolf20.charginggadgets.blocks.chargingstation.ChargingStationTile;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.IEventBus;
@@ -26,8 +26,6 @@ public class ChargingGadgets {
     private static final Logger LOGGER = LogManager.getLogger();
 
     public ChargingGadgets(IEventBus eventBus, ModContainer container) {
-        //IEventBus event = FMLJavaModLoadingContext.get().getModEventBus();
-
         BlockRegistry.ITEMS.register(eventBus);
         BlockRegistry.BLOCKS.register(eventBus);
         BlockRegistry.TILES_ENTITIES.register(eventBus);
@@ -38,8 +36,6 @@ public class ChargingGadgets {
         eventBus.addListener(this::registerCapabilities);
         eventBus.addListener(this::clientSetup);
         eventBus.addListener(this::setupCreativeTabs);
-
-        //MinecraftForge.EVENT_BUS.register(this);
 
         container.registerConfig(ModConfig.Type.SERVER, Config.SERVER_CONFIG);
     }
@@ -52,7 +48,7 @@ public class ChargingGadgets {
     }
 
     private void setupCreativeTabs(final RegisterEvent event) {
-        ResourceKey<CreativeModeTab> TAB = ResourceKey.create(Registries.CREATIVE_MODE_TAB, ResourceLocation.fromNamespaceAndPath(MOD_ID, "creative_tab"));
+        ResourceKey<CreativeModeTab> TAB = ResourceKey.create(Registries.CREATIVE_MODE_TAB, Identifier.fromNamespaceAndPath(MOD_ID, "creative_tab"));
         event.register(Registries.CREATIVE_MODE_TAB, creativeModeTabRegisterHelper ->
         {
             creativeModeTabRegisterHelper.register(TAB, CreativeModeTab.builder().icon(() -> new ItemStack(BlockRegistry.CHARGING_STATION_BI.get()))
@@ -65,11 +61,11 @@ public class ChargingGadgets {
     }
 
     private void registerCapabilities(RegisterCapabilitiesEvent event) {
-        event.registerBlock(Capabilities.ItemHandler.BLOCK,
+        event.registerBlock(Capabilities.Item.BLOCK,
                 (level, pos, state, be, side) -> ((ChargingStationTile) be).inventory,
                 // blocks to register for
                 BlockRegistry.CHARGING_STATION.get());
-        event.registerBlock(Capabilities.EnergyStorage.BLOCK,
+        event.registerBlock(Capabilities.Energy.BLOCK,
                 (level, pos, state, be, side) -> ((ChargingStationTile) be).energyStorage,
                 // blocks to register for
                 BlockRegistry.CHARGING_STATION.get());

@@ -19,21 +19,22 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
 import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.transfer.item.ItemResource;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
 
 public class ChargingStationBlock extends Block implements EntityBlock {
-    public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+    public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
 
-    public ChargingStationBlock() {
-        super(Properties.of().strength(2f));
+    public ChargingStationBlock(Properties properties) {
+        super(properties);
 
         registerDefaultState(getStateDefinition().any().setValue(FACING, Direction.NORTH));
     }
@@ -62,38 +63,20 @@ public class ChargingStationBlock extends Block implements EntityBlock {
         BlockEntity te = builder.getOptionalParameter(LootContextParams.BLOCK_ENTITY);
 
         List<ItemStack> drops = super.getDrops(state, builder);
-        if (te instanceof ChargingStationTile) {
-            ChargingStationTile tileEntity = (ChargingStationTile) te;
+        if (te instanceof ChargingStationTile tileEntity) {
             drops.stream()
                     .filter(e -> e.getItem() instanceof ChargingStationItem)
                     .findFirst()
-                    .ifPresent(e -> e.set(CGDataComponents.ENERGY, tileEntity.energyStorage.getEnergyStored()));
+                    .ifPresent(e -> e.set(CGDataComponents.ENERGY, tileEntity.energyStorage.getAmountAsInt()));
         }
 
         return drops;
     }
 
     @Override
-    @SuppressWarnings("deprecation")
-    public void onRemove(BlockState state, Level worldIn, BlockPos pos, BlockState newState, boolean isMoving) {
-        if (newState.getBlock() != this) {
-            BlockEntity tileEntity = worldIn.getBlockEntity(pos);
-            if (tileEntity != null) {
-                //LazyOptional<IItemHandler> cap = tileEntity.getCapability(ForgeCapabilities.ITEM_HANDLER);
-                var cap = worldIn.getCapability(Capabilities.ItemHandler.BLOCK, pos, state, tileEntity, null);
-                if (cap != null) {
-                    for (int i = 0; i < cap.getSlots(); i++)
-                        Containers.dropItemStack(worldIn, pos.getX(), pos.getY(), pos.getZ(), cap.getStackInSlot(i));
-                }
-            }
-            super.onRemove(state, worldIn, pos, newState, isMoving);
-        }
-    }
-
-    @Override
     public InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult hit) {
         // Only execute on the server
-        if (level.isClientSide)
+        if (level.isClientSide())
             return InteractionResult.SUCCESS;
 
         BlockEntity te = level.getBlockEntity(blockPos);

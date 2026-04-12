@@ -5,11 +5,13 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.items.ItemStackHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.item.ItemStacksResourceHandler;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 
 import javax.annotation.Nonnull;
 
-public class ChargerItemHandler extends ItemStackHandler {
+public class ChargerItemHandler extends ItemStacksResourceHandler {
     private final ChargingStationTile chargingStationTile;
 
     public ChargerItemHandler(ChargingStationTile chargingStationTile) {
@@ -18,22 +20,50 @@ public class ChargerItemHandler extends ItemStackHandler {
     }
 
     @Override
-    protected void onContentsChanged(int slot) {
-        chargingStationTile.setChanged();
+    protected void onContentsChanged(int slot, ItemStack previous) {
+        if (chargingStationTile != null)
+            chargingStationTile.setChanged();
     }
 
-    @Nonnull
     @Override
-    public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
-        if (slot == ChargingStationTile.Slots.FUEL.getId() && stack.getItem() == Items.BUCKET)
-            return super.insertItem(slot, stack, simulate);
+    public boolean isValid(int index, @Nonnull ItemResource resource) {
+        // Client-side dummy handler has no tile — allow everything, server enforces rules
+        if (chargingStationTile == null)
+            return true;
 
-        if (slot == ChargingStationTile.Slots.FUEL.getId() && stack.getBurnTime(RecipeType.SMELTING) <= 0)
-            return stack;
+        ItemStack stack = resource.toStack(1);
 
-        if (slot == ChargingStationTile.Slots.CHARGE.getId() && (stack.getCapability(Capabilities.EnergyStorage.ITEM) == null || getStackInSlot(slot).getCount() > 0))
-            return stack;
+        if (index == ChargingStationTile.Slots.FUEL.getId() && stack.getItem() == Items.BUCKET)
+            return true;
 
-        return super.insertItem(slot, stack, simulate);
+        if (index == ChargingStationTile.Slots.FUEL.getId()) {
+            return stack.getBurnTime(RecipeType.SMELTING, chargingStationTile.getFuelValues()) > 0;
+        }
+
+        if (index == ChargingStationTile.Slots.CHARGE.getId()) {
+            return stack.getCapability(Capabilities.Energy.ITEM, null) != null;
+        }
+
+        return true;
+    }
+
+    @Override
+    public int insert(int index, ItemResource resource, int amount, TransactionContext transaction) {
+        // Client-side dummy handler has no tile — allow everything, server enforces rules
+        if (chargingStationTile == null)
+            return super.insert(index, resource, amount, transaction);
+
+        ItemStack stack = resource.toStack(1);
+
+        if (index == ChargingStationTile.Slots.FUEL.getId() && stack.getItem() == Items.BUCKET)
+            return super.insert(index, resource, amount, transaction);
+
+        if (index == ChargingStationTile.Slots.FUEL.getId() && stack.getBurnTime(RecipeType.SMELTING, chargingStationTile.getFuelValues()) <= 0)
+            return 0;
+
+        if (index == ChargingStationTile.Slots.CHARGE.getId() && (stack.getCapability(Capabilities.Energy.ITEM, null) == null || getAmountAsInt(index) > 0))
+            return 0;
+
+        return super.insert(index, resource, amount, transaction);
     }
 }
