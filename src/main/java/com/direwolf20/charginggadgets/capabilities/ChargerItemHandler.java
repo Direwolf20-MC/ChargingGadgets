@@ -5,6 +5,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.transfer.access.ItemAccess;
 import net.neoforged.neoforge.transfer.item.ItemResource;
 import net.neoforged.neoforge.transfer.item.ItemStacksResourceHandler;
 import net.neoforged.neoforge.transfer.transaction.TransactionContext;
@@ -41,7 +42,7 @@ public class ChargerItemHandler extends ItemStacksResourceHandler {
         }
 
         if (index == ChargingStationTile.Slots.CHARGE.getId()) {
-            return stack.getCapability(Capabilities.Energy.ITEM, null) != null;
+            return ItemAccess.forStack(stack).getCapability(Capabilities.Energy.ITEM) != null;
         }
 
         return true;
@@ -61,7 +62,7 @@ public class ChargerItemHandler extends ItemStacksResourceHandler {
         if (index == ChargingStationTile.Slots.FUEL.getId() && stack.getBurnTime(RecipeType.SMELTING, chargingStationTile.getFuelValues()) <= 0)
             return 0;
 
-        if (index == ChargingStationTile.Slots.CHARGE.getId() && (stack.getCapability(Capabilities.Energy.ITEM, null) == null || getAmountAsInt(index) > 0))
+        if (index == ChargingStationTile.Slots.CHARGE.getId() && (ItemAccess.forStack(stack).getCapability(Capabilities.Energy.ITEM) == null || getAmountAsInt(index) > 0))
             return 0;
 
         return super.insert(index, resource, amount, transaction);

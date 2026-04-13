@@ -11,9 +11,11 @@ import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.transfer.access.ItemAccess;
 import net.neoforged.neoforge.transfer.item.ItemResource;
 import net.neoforged.neoforge.transfer.item.ItemStacksResourceHandler;
 import net.neoforged.neoforge.transfer.item.ResourceHandlerSlot;
@@ -76,11 +78,29 @@ public class ChargingStationContainer extends AbstractContainerMenu {
             itemstack = currentStack.copy();
 
             if (index < SLOTS) {
+                // Shift-clicking out of the machine slots into player inventory
                 if (!this.moveItemStackTo(currentStack, SLOTS, this.slots.size(), false)) {
                     return ItemStack.EMPTY;
                 }
-            } else if (!this.moveItemStackTo(currentStack, 0, SLOTS, false)) {
-                return ItemStack.EMPTY;
+            } else {
+                // Shift-clicking from player inventory into the machine
+                // Route to the correct slot based on item type
+                boolean moved = false;
+
+                if (ItemAccess.forStack(currentStack).getCapability(Capabilities.Energy.ITEM) != null) {
+                    // Item accepts energy — send to charge slot (slot 1)
+                    moved = this.moveItemStackTo(currentStack, ChargingStationTile.Slots.CHARGE.getId(), ChargingStationTile.Slots.CHARGE.getId() + 1, false);
+                }
+
+                if (!moved && (currentStack.getItem() == Items.BUCKET
+                        || currentStack.getBurnTime(RecipeType.SMELTING, playerIn.level().fuelValues()) > 0)) {
+                    // Item is burnable or a bucket — send to fuel slot (slot 0)
+                    moved = this.moveItemStackTo(currentStack, ChargingStationTile.Slots.FUEL.getId(), ChargingStationTile.Slots.FUEL.getId() + 1, false);
+                }
+
+                if (!moved) {
+                    return ItemStack.EMPTY;
+                }
             }
 
             if (currentStack.isEmpty()) {
